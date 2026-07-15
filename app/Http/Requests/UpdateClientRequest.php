@@ -21,7 +21,7 @@ class UpdateClientRequest extends FormRequest
             'person_type'          => ['required', 'in:natural,juridica'],
             'tax_regime'           => ['required', 'in:gran_contribuyente,autorretenedor,agente_retencion_iva,regimen_simple,no_aplica'],
             'tax_responsibilities' => ['nullable', 'array'],
-            'tax_responsibilities.*' => ['string'],
+            'tax_responsibilities.*' => ['string', 'exists:tax_obligation_types,code'],
             'email'                => ['nullable', 'email', 'max:255'],
             'phone'                => ['nullable', 'string', 'max:20'],
             'address'              => ['nullable', 'string', 'max:255'],
@@ -30,6 +30,12 @@ class UpdateClientRequest extends FormRequest
             'contact_person'       => ['nullable', 'string', 'max:255'],
             'status'               => ['required', 'in:active,inactive'],
             'notes'                => ['nullable', 'string', 'max:1000'],
+            'invoice_prefix'       => ['nullable', 'string', 'max:20'],
+            'invoice_consecutive'  => ['nullable', 'integer', 'min:0'],
+            'payroll_periodicity'  => ['nullable', 'in:mensual,quincenal'],
+            'payroll_prefix'       => ['nullable', 'string', 'max:20'],
+            'payroll_consecutive'  => ['nullable', 'integer', 'min:0'],
+            'payroll_pila_exempt'  => ['nullable', 'boolean'],
         ];
     }
 }

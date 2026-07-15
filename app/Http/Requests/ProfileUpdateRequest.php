@@ -24,6 +24,13 @@ class ProfileUpdateRequest extends FormRequest
             'city'                    => ['nullable', 'string', 'max:100'],
             'address'                 => ['nullable', 'string', 'max:255'],
             'professional_card_number' => ['nullable', 'string', 'max:50'],
+            'logo'                 => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+            'bank_name'            => ['nullable', 'string', 'max:100'],
+            'account_type'         => ['nullable', 'in:savings,checking'],
+            'account_number'       => ['nullable', 'string', 'max:50'],
+            'account_holder_name'  => ['nullable', 'string', 'max:150'],
+            'account_holder_id'    => ['nullable', 'string', 'max:30'],
+            'payment_link'         => ['nullable', 'string', 'max:500'],
         ];
     }
 }

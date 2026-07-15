@@ -2,61 +2,47 @@
 <x-slot name="title">Clientes</x-slot>
 
 {{-- Header --}}
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <div class="flex items-center gap-3">
-            <span class="text-sm font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg">{{ $totalActive }} activos</span>
-            @if($totalInactive)
-            <span class="text-sm text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg">{{ $totalInactive }} inactivos</span>
-            @endif
-        </div>
-    </div>
+<div class="flex flex-col sm:flex-row sm:items-start sm:justify-end gap-4 mb-6">
     <a href="{{ route('clients.create') }}"
-       class="inline-flex items-center gap-2 px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
+       class="inline-flex items-center gap-[6px] h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">
+        <x-lucide-plus class="w-4 h-4" />
         Nuevo cliente
     </a>
 </div>
 
 {{-- Flash --}}
 @if(session('success'))
-<div class="mb-4 flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-4 py-3 rounded-lg">
-    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-    </svg>
+<div class="mb-4 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
+    <x-lucide-check-circle class="w-4 h-4 flex-shrink-0" />
     {{ session('success') }}
 </div>
 @endif
 
 {{-- Filtros --}}
-<form method="GET" action="{{ route('clients.index') }}" class="bg-white rounded-xl shadow-sm border border-gray-100 px-5 py-4 mb-5">
+<form method="GET" action="{{ route('clients.index') }}" class="mb-5">
     <div class="flex flex-col sm:flex-row gap-3">
-        <div class="flex-1 relative">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
+        <div class="relative flex-1">
+            <x-lucide-search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-400)]" />
             <input type="text" name="search" value="{{ request('search') }}"
                    placeholder="Buscar por nombre o número de documento..."
-                   class="pl-9 w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500" />
+                   class="w-full h-10 pl-9 pr-4 rounded-[var(--radius-control)] border border-[var(--border-default)] bg-[var(--surface-subtle)] text-[14px] text-[var(--text-700)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)] outline-none" />
         </div>
-        <select name="status" class="rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 min-w-[140px]">
+        <select name="status" class="h-10 rounded-[var(--radius-control)] border border-[var(--border-default)] bg-[var(--surface-subtle)] px-3.5 text-[14px] text-[var(--text-700)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)] outline-none min-w-[140px]">
             <option value="">Todos los estados</option>
             <option value="active"   {{ request('status') === 'active'   ? 'selected' : '' }}>Activo</option>
             <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactivo</option>
         </select>
-        <select name="regime" class="rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 min-w-[220px]">
+        <select name="regime" class="h-10 rounded-[var(--radius-control)] border border-[var(--border-default)] bg-[var(--surface-subtle)] px-3.5 text-[14px] text-[var(--text-700)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)] outline-none min-w-[220px]">
             <option value="">Todas las responsabilidades</option>
             @foreach(\App\Models\Client::TAX_RESPONSIBILITIES as $val => $lbl)
             <option value="{{ $val }}" {{ request('regime') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
             @endforeach
         </select>
-        <button type="submit" class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium rounded-lg transition-colors">
+        <button type="submit" class="h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">
             Buscar
         </button>
         @if(request()->hasAny(['search','status','regime']))
-        <a href="{{ route('clients.index') }}" class="px-4 py-2 border border-gray-300 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+        <a href="{{ route('clients.index') }}" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
             Limpiar
         </a>
         @endif
@@ -64,102 +50,80 @@
 </form>
 
 {{-- Tabla --}}
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+<div class="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] overflow-hidden">
     @if($clients->isEmpty())
-    <div class="text-center py-16">
-        <svg class="w-12 h-12 text-gray-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
+    <div class="flex flex-col items-center justify-center py-16 text-center">
+        <div class="w-16 h-16 rounded-[var(--radius-card)] bg-[var(--surface-muted)] flex items-center justify-center mb-4">
+            <x-lucide-users class="w-8 h-8 text-[var(--text-400)]" />
+        </div>
         @if(request()->hasAny(['search','status','regime']))
-        <p class="text-gray-500 font-medium">No se encontraron clientes con esos filtros</p>
-        <a href="{{ route('clients.index') }}" class="mt-2 inline-block text-sm text-blue-600 hover:text-blue-700">Limpiar filtros</a>
+        <p class="text-[14px] font-semibold text-[var(--text-700)]">No se encontraron clientes con esos filtros</p>
+        <a href="{{ route('clients.index') }}" class="mt-2 text-[13px] text-[var(--color-primary)] hover:underline font-medium">Limpiar filtros</a>
         @else
-        <p class="text-gray-500 font-medium">Aún no tienes clientes registrados</p>
-        <a href="{{ route('clients.create') }}" class="mt-3 inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium">
-            + Agregar primer cliente
+        <p class="text-[14px] font-semibold text-[var(--text-700)]">Aún no tienes clientes registrados</p>
+        <p class="text-[12px] text-[var(--text-400)] mt-1">Agrega tu primer cliente para comenzar</p>
+        <a href="{{ route('clients.create') }}" class="mt-4 inline-flex items-center gap-[6px] h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">
+            <x-lucide-plus class="w-4 h-4" />
+            Agregar primer cliente
         </a>
         @endif
     </div>
     @else
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full">
             <thead>
-                <tr class="text-xs text-gray-400 uppercase tracking-wide bg-gray-50 border-b border-gray-100">
-                    <th class="px-5 py-3 text-left font-medium">Nombre / Razón social</th>
-                    <th class="px-5 py-3 text-left font-medium hidden md:table-cell">Documento</th>
-                    <th class="px-5 py-3 text-left font-medium hidden lg:table-cell">Resp. tributaria</th>
-                    <th class="px-5 py-3 text-left font-medium hidden xl:table-cell">Ciudad</th>
-                    <th class="px-5 py-3 text-center font-medium">Estado</th>
-                    <th class="px-5 py-3 text-right font-medium">Acciones</th>
+                <tr class="border-b border-[var(--border-default)]">
+                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left">Nombre / Razón social</th>
+                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left hidden md:table-cell">Documento</th>
+                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left hidden lg:table-cell">Resp. tributaria</th>
+                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left hidden xl:table-cell">Ciudad</th>
+                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-center">Estado</th>
+                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-right">Acciones</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-50">
+            <tbody>
                 @foreach($clients as $client)
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-5 py-3.5">
-                        <a href="{{ route('clients.show', $client) }}" class="font-semibold text-gray-900 hover:text-blue-700 transition-colors">
+                <tr class="border-b border-[var(--surface-muted)] hover:bg-[var(--surface-subtle)]">
+                    <td class="px-6 py-[14px]">
+                        <a href="{{ route('clients.show', $client) }}" class="font-semibold text-[14px] text-[var(--text-900)] hover:text-[var(--color-primary)]">
                             {{ $client->name }}
                         </a>
-                        <p class="text-xs text-gray-400 mt-0.5 md:hidden">
+                        <p class="text-[12px] text-[var(--text-400)] mt-0.5 md:hidden">
                             {{ $client->document_type }} {{ $client->full_document }}
                         </p>
                     </td>
-                    <td class="px-5 py-3.5 hidden md:table-cell text-gray-600">
-                        <span class="text-xs font-medium text-gray-400">{{ $client->document_type }}</span>
+                    <td class="px-6 py-[14px] hidden md:table-cell text-[14px] text-[var(--text-700)]">
+                        <span class="text-[12px] font-medium text-[var(--text-400)]">{{ $client->document_type }}</span>
                         {{ $client->full_document }}
                     </td>
-                    <td class="px-5 py-3.5 hidden lg:table-cell">
-                        @php
-                            $regimeColors = [
-                                'gran_contribuyente'   => 'bg-purple-100 text-purple-700',
-                                'autorretenedor'       => 'bg-blue-100 text-blue-700',
-                                'agente_retencion_iva' => 'bg-indigo-100 text-indigo-700',
-                                'regimen_simple'       => 'bg-amber-100 text-amber-700',
-                                'no_aplica'            => 'bg-gray-100 text-gray-600',
-                            ];
-                        @endphp
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium {{ $regimeColors[$client->tax_regime] ?? 'bg-gray-100 text-gray-600' }}">
-                            {{ \App\Models\Client::TAX_RESPONSIBILITIES[$client->tax_regime] ?? $client->tax_regime }}
-                        </span>
+                    <td class="px-6 py-[14px] hidden lg:table-cell text-[13px] text-[var(--text-500)]">
+                        {{ \App\Models\Client::TAX_RESPONSIBILITIES[$client->tax_regime] ?? $client->tax_regime }}
                     </td>
-                    <td class="px-5 py-3.5 hidden xl:table-cell text-gray-600 text-sm">
+                    <td class="px-6 py-[14px] hidden xl:table-cell text-[14px] text-[var(--text-700)]">
                         {{ $client->city ?? '—' }}
                     </td>
-                    <td class="px-5 py-3.5 text-center">
-                        @if($client->status === 'active')
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Activo
-                        </span>
-                        @else
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
-                            <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Inactivo
-                        </span>
-                        @endif
+                    <td class="px-6 py-[14px] text-center">
+                        <x-status-badge :variant="$client->status === 'active' ? 'success' : 'neutral'">
+                            {{ $client->status === 'active' ? 'Activo' : 'Inactivo' }}
+                        </x-status-badge>
                     </td>
-                    <td class="px-5 py-3.5 text-right">
-                        <div class="flex items-center justify-end gap-2">
+                    <td class="px-6 py-[14px] text-right">
+                        <div class="flex items-center justify-end gap-[10px]">
                             <a href="{{ route('clients.show', $client) }}"
-                               class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors" title="Ver detalle">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
+                               class="text-[var(--text-400)] hover:text-[var(--text-900)]" title="Ver detalle">
+                                <x-lucide-eye class="w-4 h-4" />
                             </a>
                             <a href="{{ route('clients.edit', $client) }}"
-                               class="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors" title="Editar">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
+                               class="text-[var(--text-400)] hover:text-[var(--text-900)]" title="Editar">
+                                <x-lucide-edit-2 class="w-4 h-4" />
                             </a>
                             <form method="POST" action="{{ route('clients.destroy', $client) }}"
                                   x-data=""
                                   x-on:submit.prevent="if(confirm('¿Eliminar a {{ addslashes($client->name) }}? Esta acción no se puede deshacer.')) $el.submit()">
                                 @csrf @method('DELETE')
                                 <button type="submit"
-                                        class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Eliminar">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
+                                        class="text-[var(--color-danger)]/60 hover:text-[var(--color-danger)]" title="Eliminar">
+                                    <x-lucide-trash-2 class="w-4 h-4" />
                                 </button>
                             </form>
                         </div>
@@ -171,7 +135,7 @@
     </div>
 
     @if($clients->hasPages())
-    <div class="px-5 py-4 border-t border-gray-100">
+    <div class="px-6 py-4 border-t border-[var(--border-default)]">
         {{ $clients->links() }}
     </div>
     @endif

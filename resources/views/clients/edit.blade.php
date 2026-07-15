@@ -1,19 +1,19 @@
 <x-app-layout>
 <x-slot name="title">Editar Cliente</x-slot>
 
-<div class="max-w-4xl">
+<div class="max-w-4xl mx-auto">
 
-    {{-- Breadcrumb --}}
-    <div class="flex items-center gap-2 text-sm text-gray-500 mb-5">
-        <a href="{{ route('clients.index') }}" class="hover:text-blue-600 transition-colors">Clientes</a>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-        </svg>
-        <a href="{{ route('clients.show', $client) }}" class="hover:text-blue-600 transition-colors">{{ $client->name }}</a>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-gray-800 font-medium">Editar</span>
+    {{-- Breadcrumb + título --}}
+    <div class="mb-6">
+        <nav class="flex items-center gap-1.5 text-[14px] text-[var(--text-400)] mb-2">
+            <a href="{{ route('clients.index') }}" class="hover:text-[var(--color-primary)]">Clientes</a>
+            <x-lucide-chevron-right class="w-3.5 h-3.5" />
+            <a href="{{ route('clients.show', $client) }}" class="hover:text-[var(--color-primary)] truncate">{{ $client->name }}</a>
+            <x-lucide-chevron-right class="w-3.5 h-3.5" />
+            <span class="text-[var(--text-700)] font-medium">Editar</span>
+        </nav>
+        <h1 class="text-[22px] font-semibold text-[var(--text-900)]">{{ $client->name }}</h1>
+        <p class="text-[14px] text-[var(--text-500)] mt-0.5">Actualiza los datos del cliente</p>
     </div>
 
     <form method="POST" action="{{ route('clients.update', $client) }}">
@@ -24,11 +24,11 @@
 
         <div class="flex items-center gap-3 mt-6">
             <button type="submit"
-                    class="px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    class="h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">
                 Guardar cambios
             </button>
             <a href="{{ route('clients.show', $client) }}"
-               class="px-6 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+               class="h-10 flex items-center px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
                 Cancelar
             </a>
         </div>

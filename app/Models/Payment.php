@@ -15,6 +15,7 @@ class Payment extends Model
         'payment_method',
         'reference',
         'notes',
+        'receipt_path',
     ];
 
     protected $casts = [

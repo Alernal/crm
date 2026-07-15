@@ -5,8 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Models\Client;
+use App\Models\Invoice;
+use App\Services\VirtualArchiveService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ClientController extends Controller
@@ -42,9 +46,13 @@ class ClientController extends Controller
         return view('clients.create');
     }
 
-    public function store(StoreClientRequest $request): RedirectResponse
+    public function store(StoreClientRequest $request, VirtualArchiveService $archive): RedirectResponse
     {
-        $request->user()->clients()->create($request->validated());
+        DB::transaction(function () use ($request, $archive) {
+            $data = array_merge($request->validated(), ['payroll_pila_exempt' => $request->boolean('payroll_pila_exempt')]);
+            $client = $request->user()->clients()->create($data);
+            $archive->createClientFolders($client);
+        });
 
         return redirect()->route('clients.index')
             ->with('success', 'Cliente creado correctamente.');
@@ -53,6 +61,8 @@ class ClientController extends Controller
     public function show(Request $request, Client $client): View
     {
         abort_if($client->user_id !== $request->user()->id, 403);
+
+        Invoice::syncOverdueForUser($request->user()->id);
 
         $client->load(['invoices.payments', 'taxEvents']);
 
@@ -81,7 +91,8 @@ class ClientController extends Controller
     {
         abort_if($client->user_id !== $request->user()->id, 403);
 
-        $client->update($request->validated());
+        $data = array_merge($request->validated(), ['payroll_pila_exempt' => $request->boolean('payroll_pila_exempt')]);
+        $client->update($data);
 
         return redirect()->route('clients.show', $client)
             ->with('success', 'Cliente actualizado correctamente.');
@@ -95,5 +106,30 @@ class ClientController extends Controller
 
         return redirect()->route('clients.index')
             ->with('success', 'Cliente eliminado.');
+    }
+
+    public function search(Request $request): JsonResponse
+    {
+        $q = (string) $request->get('q', '');
+
+        if (mb_strlen($q) < 3) {
+            return response()->json([]);
+        }
+
+        $clients = $request->user()->clients()
+            ->where('status', 'active')
+            ->where(function ($query) use ($q) {
+                $query->where('name', 'like', "%{$q}%")
+                      ->orWhere('document_number', 'like', "%{$q}%");
+            })
+            ->orderBy('name')
+            ->limit(10)
+            ->get(['id', 'name', 'document_type', 'document_number', 'dv']);
+
+        return response()->json($clients->map(fn($c) => [
+            'id'   => $c->id,
+            'name' => $c->name,
+            'nit'  => $c->document_type . ' ' . $c->full_document,
+        ]));
     }
 }

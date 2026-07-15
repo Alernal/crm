@@ -28,6 +28,14 @@ class User extends Authenticatable
         'city',
         'address',
         'professional_card_number',
+        'logo_path',
+        'bank_name',
+        'account_type',
+        'account_number',
+        'account_holder_name',
+        'account_holder_id',
+        'payment_link',
+        'is_admin',
     ];
 
     /**
@@ -50,6 +58,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
         ];
     }
 
@@ -81,5 +90,30 @@ class User extends Authenticatable
     public function documents(): HasMany
     {
         return $this->hasMany(Document::class);
+    }
+
+    public function budgets(): HasMany
+    {
+        return $this->hasMany(Budget::class);
+    }
+
+    public function employees(): HasMany
+    {
+        return $this->hasMany(Employee::class);
+    }
+
+    public function payrollPeriods(): HasMany
+    {
+        return $this->hasMany(PayrollPeriod::class);
+    }
+
+    public function primaSettlements(): HasMany
+    {
+        return $this->hasMany(PrimaSettlement::class);
+    }
+
+    public function cesantiaSettlements(): HasMany
+    {
+        return $this->hasMany(CesantiaSettlement::class);
     }
 }

@@ -16,17 +16,24 @@ class Invoice extends Model
         'due_date',
         'subtotal',
         'vat_amount',
+        'discount_amount',
+        'withholding_rate',
+        'withholding_amount',
         'total',
         'status',
         'notes',
+        'payment_method',
     ];
 
     protected $casts = [
-        'issue_date' => 'date',
-        'due_date'   => 'date',
-        'subtotal'   => 'decimal:2',
-        'vat_amount' => 'decimal:2',
-        'total'      => 'decimal:2',
+        'issue_date'         => 'date',
+        'due_date'           => 'date',
+        'subtotal'           => 'decimal:2',
+        'vat_amount'         => 'decimal:2',
+        'discount_amount'    => 'decimal:2',
+        'withholding_rate'   => 'decimal:2',
+        'withholding_amount' => 'decimal:2',
+        'total'              => 'decimal:2',
     ];
 
     public function user(): BelongsTo
@@ -57,5 +64,14 @@ class Invoice extends Model
     public function getBalanceAttribute(): float
     {
         return (float) $this->total - $this->paid_amount;
+    }
+
+    public static function syncOverdueForUser(int $userId): void
+    {
+        static::where('user_id', $userId)
+            ->where('status', 'sent')
+            ->whereNotNull('due_date')
+            ->where('due_date', '<', now()->toDateString())
+            ->update(['status' => 'overdue']);
     }
 }

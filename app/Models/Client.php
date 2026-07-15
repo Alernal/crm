@@ -16,17 +16,6 @@ class Client extends Model
         'no_aplica'            => 'No Aplica',
     ];
 
-    const TAX_OBLIGATIONS = [
-        'IVA'        => 'IVA – Impuesto sobre las ventas',
-        'Retefuente' => 'Retefuente – Agente de retención',
-        'ICA'        => 'ICA – Industria y Comercio',
-        'Renta'      => 'Renta – Impuesto sobre la renta',
-        'Patrimonio' => 'Declaración de patrimonio',
-        'INC'        => 'INC – Impoconsumo',
-        'Exogena'    => 'Información exógena',
-        'Avisos'     => 'Avisos y tableros',
-    ];
-
     protected $fillable = [
         'user_id',
         'name',
@@ -44,10 +33,17 @@ class Client extends Model
         'contact_person',
         'status',
         'notes',
+        'invoice_prefix',
+        'invoice_consecutive',
+        'payroll_periodicity',
+        'payroll_prefix',
+        'payroll_consecutive',
+        'payroll_pila_exempt',
     ];
 
     protected $casts = [
         'tax_responsibilities' => 'array',
+        'payroll_pila_exempt' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -63,6 +59,43 @@ class Client extends Model
     public function taxEvents(): HasMany
     {
         return $this->hasMany(TaxEvent::class);
+    }
+
+    public function virtualFolders(): HasMany
+    {
+        return $this->hasMany(VirtualFolder::class);
+    }
+
+    public function virtualFiles(): HasMany
+    {
+        return $this->hasMany(VirtualFile::class);
+    }
+
+    public function employees(): HasMany
+    {
+        return $this->hasMany(Employee::class);
+    }
+
+    public function payrollPeriods(): HasMany
+    {
+        return $this->hasMany(PayrollPeriod::class);
+    }
+
+    public function primaSettlements(): HasMany
+    {
+        return $this->hasMany(PrimaSettlement::class);
+    }
+
+    public function cesantiaSettlements(): HasMany
+    {
+        return $this->hasMany(CesantiaSettlement::class);
+    }
+
+    public function archiveRootName(): string
+    {
+        $doc = $this->document_number;
+        if ($this->dv) $doc .= '-' . $this->dv;
+        return "{$doc} - {$this->name}";
     }
 
     public function getFullDocumentAttribute(): string
