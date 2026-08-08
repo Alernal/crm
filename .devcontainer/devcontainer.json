@@ -1,0 +1,17 @@
+{
+  "name": "CRM Profesional",
+  "postStartCommand": "bash .devcontainer/start-dev.sh",
+  "forwardPorts": [8000, 5173],
+  "portsAttributes": {
+    "8000": {
+      "label": "Laravel (app)",
+      "visibility": "public",
+      "onAutoForward": "notify"
+    },
+    "5173": {
+      "label": "Vite (assets)",
+      "visibility": "public",
+      "onAutoForward": "silent"
+    }
+  }
+}
