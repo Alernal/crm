@@ -66,6 +66,7 @@ class DashboardController extends Controller
             ->with('client:id,name')
             ->where('status', 'pending')
             ->where('due_date', '>=', now())
+            ->where('due_date', '<=', now()->addDays(60))
             ->orderBy('due_date')
             ->take(7)
             ->get();

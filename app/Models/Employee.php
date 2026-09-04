@@ -59,6 +59,8 @@ class Employee extends Model
         'afp',
         'arl_risk_level',
         'pension_exempt',
+        'vacation_opening_balance_days',
+        'vacation_opening_balance_date',
         'ccf',
         'bank_name',
         'account_type',
@@ -72,6 +74,8 @@ class Employee extends Model
         'base_salary' => 'decimal:2',
         'weekly_hours_override' => 'decimal:2',
         'pension_exempt' => 'boolean',
+        'vacation_opening_balance_days' => 'decimal:2',
+        'vacation_opening_balance_date' => 'date',
     ];
 
     public function user(): BelongsTo
@@ -87,6 +91,16 @@ class Employee extends Model
     public function payrolls(): HasMany
     {
         return $this->hasMany(Payroll::class);
+    }
+
+    public function contractSettlements(): HasMany
+    {
+        return $this->hasMany(ContractSettlement::class);
+    }
+
+    public function vacationPeriods(): HasMany
+    {
+        return $this->hasMany(EmployeeVacationPeriod::class);
     }
 
     public function getFullNameAttribute(): string

@@ -28,7 +28,7 @@
 
     {{-- Información básica --}}
     <div class="px-6 py-5 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)] mb-4">Información del servicio</h2>
+        <h2 class="text-[16px] font-bold text-[var(--text-900)] mb-4">Información del servicio</h2>
         <div class="grid grid-cols-1 gap-5">
 
             <div>
@@ -40,6 +40,48 @@
                        placeholder="Ej: Declaración de Renta Persona Natural"
                        class="{{ $inputClass }}" />
                 @error('name')
+                <p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div x-data="serviceCategoryPicker(
+                    @js($categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name])->values()),
+                    @json(old('category_id', $service->category_id ?? null)),
+                    '{{ csrf_token() }}',
+                    '{{ route('services.categories.store') }}'
+                 )">
+                <label for="category_id" class="{{ $labelClass }}">
+                    Categoría
+                </label>
+                <div class="flex items-center gap-2">
+                    <select id="category_id" name="category_id" x-model="selected" class="{{ $inputClass }}">
+                        <option value="">Sin categoría</option>
+                        <template x-for="cat in categories" :key="cat.id">
+                            <option :value="cat.id" x-text="cat.name"></option>
+                        </template>
+                    </select>
+                    <button type="button" @click="adding = !adding"
+                            class="flex-shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-500)] hover:bg-[var(--surface-subtle)] hover:text-[var(--text-900)]"
+                            title="Nueva categoría">
+                        <x-lucide-plus class="w-4 h-4" />
+                    </button>
+                </div>
+
+                <div x-show="adding" x-cloak class="mt-2 flex items-center gap-2">
+                    <input type="text" id="new_category_name" x-model="newName" @keydown.enter.prevent="createCategory()"
+                           placeholder="Ej: Finanzas" maxlength="100"
+                           class="{{ $inputClass }} h-9" />
+                    <button type="button" @click="createCategory()" :disabled="creating"
+                            class="flex-shrink-0 h-9 px-3 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[13px] font-medium disabled:opacity-60">
+                        Guardar
+                    </button>
+                    <button type="button" @click="adding = false; newName = ''; error = ''"
+                            class="flex-shrink-0 h-9 px-3 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-500)] hover:bg-[var(--surface-subtle)] text-[13px] font-medium">
+                        Cancelar
+                    </button>
+                </div>
+                <p x-show="error" x-cloak x-text="error" class="mt-1 text-[12px] text-[var(--color-danger)]"></p>
+                @error('category_id')
                 <p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>
                 @enderror
             </div>
@@ -61,19 +103,18 @@
 
     {{-- Precio y unidad --}}
     <div class="px-6 py-5 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)] mb-4">Precio y facturación</h2>
+        <h2 class="text-[16px] font-bold text-[var(--text-900)] mb-4">Precio y facturación</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
-            <div>
+            <div x-data="{ basePrice: {{ old('base_price', isset($service) ? $service->base_price : 'null') }} }">
                 <label for="base_price" class="{{ $labelClass }}">
                     Precio base (COP) <span class="text-[var(--color-danger)]">*</span>
                 </label>
                 <div class="relative">
                     <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-400)] text-[14px] font-medium">$</span>
-                    <input type="number" id="base_price" name="base_price"
-                           value="{{ old('base_price', isset($service) ? number_format($service->base_price, 2, '.', '') : '') }}"
-                           required min="0" max="999999999.99" step="0.01"
-                           placeholder="0.00"
+                    <input type="text" id="base_price" name="base_price" x-money="basePrice"
+                           required
+                           placeholder="0"
                            class="{{ $inputClass }} pl-8" />
                 </div>
                 @error('base_price')
@@ -123,7 +164,7 @@
 
     {{-- Estado --}}
     <div class="px-6 py-5">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)] mb-4">Estado</h2>
+        <h2 class="text-[16px] font-bold text-[var(--text-900)] mb-4">Estado</h2>
         <div class="flex gap-5">
             <label class="flex items-center gap-2.5 cursor-pointer">
                 <input type="radio" name="status" value="active"
@@ -146,3 +187,42 @@
     </div>
 
 </div>
+
+<script>
+function serviceCategoryPicker(categories, selected, csrfToken, storeUrl) {
+    return {
+        categories: categories,
+        selected: selected,
+        adding: false,
+        creating: false,
+        newName: '',
+        error: '',
+        createCategory() {
+            const name = this.newName.trim();
+            if (!name) return;
+            this.creating = true;
+            this.error = '';
+            fetch(storeUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, Accept: 'application/json' },
+                body: JSON.stringify({ name }),
+            }).then(async (res) => {
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error(data.errors?.name?.[0] || 'No se pudo crear la categoría.');
+                }
+                return res.json();
+            }).then((cat) => {
+                this.categories.push(cat);
+                this.selected = cat.id;
+                this.newName = '';
+                this.adding = false;
+            }).catch((err) => {
+                this.error = err.message;
+            }).finally(() => {
+                this.creating = false;
+            });
+        },
+    };
+}
+</script>

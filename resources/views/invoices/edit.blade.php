@@ -1,22 +1,18 @@
 <x-app-layout>
 <x-slot name="title">Editar cuenta</x-slot>
 
-<div class="max-w-5xl mx-auto">
+<div>
 
     {{-- Breadcrumb + título --}}
-    <div class="mb-6">
-        <nav class="flex items-center gap-1.5 text-[14px] text-[var(--text-400)] mb-2">
-            <a href="{{ route('invoices.index') }}" class="hover:text-[var(--color-primary)]">Cuentas de cobro</a>
-            <x-lucide-chevron-right class="w-3.5 h-3.5" />
-            <a href="{{ route('invoices.show', $invoice) }}" class="hover:text-[var(--color-primary)] font-mono">{{ $invoice->number }}</a>
-            <x-lucide-chevron-right class="w-3.5 h-3.5" />
-            <span class="text-[var(--text-700)] font-medium">Editar</span>
-        </nav>
-        <h1 class="text-[22px] font-semibold text-[var(--text-900)] font-mono">{{ $invoice->number }}</h1>
-        <p class="text-[14px] text-[var(--text-500)] mt-0.5">Edita los ítems y datos de la cuenta de cobro</p>
+    <div class="mb-6 max-w-[950px] mx-auto">
+        <a href="{{ route('invoices.show', $invoice) }}"
+           class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[14px] font-medium text-[var(--text-700)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-900)] mb-2">
+            <x-lucide-arrow-left class="w-4 h-4" />
+            Cancelar
+        </a>
     </div>
 
-    <form method="POST" action="{{ route('invoices.update', $invoice) }}">
+    <form method="POST" action="{{ route('invoices.update', $invoice) }}" class="max-w-[950px] mx-auto">
         @csrf
         @method('PUT')
 
@@ -24,7 +20,7 @@
 
         <div class="flex items-center justify-between mt-5">
             <a href="{{ route('invoices.show', $invoice) }}"
-               class="h-10 flex items-center px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+               class="h-10 flex items-center px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
                 Cancelar
             </a>
             <button type="submit"

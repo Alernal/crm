@@ -8,6 +8,7 @@ use App\Models\Payroll;
 use App\Models\PayrollLegalSetting;
 use App\Models\PayrollOvertimeItem;
 use App\Models\PayrollPeriod;
+use App\Services\Payroll\Concerns\CalculatesLegalDays;
 use App\Services\Payroll\OvertimeCalculator;
 use App\Services\Payroll\PayrollCalculator;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -20,6 +21,8 @@ use Illuminate\View\View;
 
 class PayrollPeriodController extends Controller
 {
+    use CalculatesLegalDays;
+
     public function index(Request $request): View
     {
         $query = $request->user()->payrollPeriods()->with('client');
@@ -296,22 +299,6 @@ class PayrollPeriodController extends Controller
             : $period->end_date;
 
         return $this->daysBase30($effectiveStart, $effectiveEnd);
-    }
-
-    /**
-     * Cuenta los días entre dos fechas bajo la convención de mes de 30 días
-     * (base 360), la misma usada en el resto del liquidador para cesantías,
-     * auxilio de transporte, etc. El último día calendario de cada mes
-     * siempre se trata como día 30, sin importar si el mes tiene 28, 29, 30
-     * o 31 días.
-     */
-    private function daysBase30(Carbon $start, Carbon $end): float
-    {
-        $day30 = fn (Carbon $d) => $d->day === $d->daysInMonth ? 30 : min($d->day, 30);
-
-        $months = ($end->year - $start->year) * 12 + ($end->month - $start->month);
-
-        return (float) ($months * 30 + $day30($end) - $day30($start) + 1);
     }
 
     private function nextNumberForClient(Client $client): string

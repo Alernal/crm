@@ -26,12 +26,12 @@
 <div class="flex items-start justify-end mb-6 gap-3 flex-wrap">
     <div class="flex items-center gap-2">
         <button x-data @click="$dispatch('abrir-pago-modal')"
-                class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+                class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[15px] font-medium hover:bg-[var(--surface-muted)]">
             <x-lucide-wallet class="w-4 h-4" />
             Agregar pago o abono
         </button>
         <a href="{{ route('invoices.create') }}"
-           class="inline-flex items-center gap-[6px] h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">
+           class="inline-flex items-center gap-[6px] h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[15px] font-medium">
             <x-lucide-plus class="w-4 h-4" />
             Nueva cuenta
         </a>
@@ -40,7 +40,9 @@
 
 {{-- ── Flash ───────────────────────────────────────────────── --}}
 @if(session('success'))
-<div class="mb-5 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
+<div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)" x-show="show"
+     x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+     class="mb-5 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[15px] px-4 py-3 rounded-[var(--radius-control)]">
     <x-lucide-check-circle class="w-4 h-4 flex-shrink-0" />
     {{ session('success') }}
 </div>
@@ -79,13 +81,13 @@ $agingBuckets = [
                name="search"
                value="{{ $search }}"
                placeholder="Buscar cliente por nombre o NIT…"
-               class="{{ $fieldClass }} pl-10">
+               class="w-full h-10 pl-10 pr-3.5 border border-[var(--border-default)] rounded-[var(--radius-control)] text-[15px] bg-[var(--surface-subtle)] text-[var(--text-700)] outline-none transition-all focus:bg-[var(--surface-card)] focus:border-[var(--border-strong)] focus:ring-2 focus:ring-[var(--color-primary-light)]">
     </div>
-    <button type="submit" class="h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">
+    <button type="submit" class="h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[15px] font-medium">
         Buscar
     </button>
     @if($search)
-    <a href="{{ route('cartera.index') }}" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+    <a href="{{ route('cartera.index') }}" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[15px] font-medium hover:bg-[var(--surface-muted)]">
         Limpiar
     </a>
     @endif
@@ -93,17 +95,23 @@ $agingBuckets = [
 
 {{-- ── Tabla por cliente ───────────────────────────────────── --}}
 <div class="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] overflow-hidden">
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto p-3">
+    <div class="overflow-y-auto max-h-[65vh]">
         <table class="w-full">
             <thead>
-                <tr class="border-b border-[var(--border-default)]">
-                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left">Cliente</th>
-                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-center hidden md:table-cell">Cuentas</th>
-                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-right hidden lg:table-cell">Facturado</th>
-                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-right hidden lg:table-cell">Cobrado</th>
-                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-right">Saldo</th>
-                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left hidden md:table-cell">Estado</th>
-                    <th class="px-4 py-3 w-14"></th>
+                <tr>
+                    @php
+                        $thClass = 'sticky top-0 z-[1] bg-[var(--surface-card)] border-b border-[var(--border-default)] text-[13px] font-bold text-[var(--text-900)] px-6 py-3.5';
+                    @endphp
+                    <th class="{{ $thClass }} text-left">Cliente</th>
+                    <th class="{{ $thClass }} text-left">Identificación</th>
+                    <th class="{{ $thClass }} text-center hidden md:table-cell">Cuentas</th>
+                    <th class="{{ $thClass }} text-right hidden lg:table-cell">Facturado</th>
+                    <th class="{{ $thClass }} text-right hidden lg:table-cell">Cobrado</th>
+                    <th class="{{ $thClass }} text-right">Saldo</th>
+                    <th class="{{ $thClass }} text-right hidden lg:table-cell">Días</th>
+                    <th class="{{ $thClass }} text-left hidden md:table-cell">Estado</th>
+                    <th class="{{ $thClass }} w-14"></th>
                 </tr>
             </thead>
             <tbody>
@@ -117,37 +125,35 @@ $agingBuckets = [
                     $hasPending  = $summary['count_pending'] > 0;
                     $daysOv      = $summary['days_overdue'];
                 @endphp
-                <tr class="border-b border-[var(--surface-muted)] hover:bg-[var(--surface-subtle)] group">
+                <tr class="border-b border-[var(--surface-muted)] border-l-[3px] border-l-transparent hover:border-l-[var(--color-primary)] hover:bg-[var(--surface-subtle)] group">
 
                     {{-- Cliente --}}
                     <td class="px-6 py-5">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-[var(--color-primary-light)] flex items-center justify-center flex-shrink-0">
-                                <span class="text-[13px] font-semibold text-[var(--color-primary)]">{{ strtoupper(substr($c->name, 0, 2)) }}</span>
-                            </div>
-                            <div class="min-w-0">
-                                <p class="text-[14px] font-semibold text-[var(--text-900)] leading-snug truncate">{{ $c->name }}</p>
-                                <p class="text-[12px] text-[var(--text-400)] font-mono mt-0.5">{{ $c->document_type }} {{ $c->full_document }}</p>
-                            </div>
+                        <div class="min-w-0">
+                            <p class="text-[14px] text-[var(--text-500)] leading-snug truncate">{{ $c->name }}</p>
                         </div>
+                    </td>
+
+                    {{-- Identificación --}}
+                    <td class="px-6 py-5 text-[14px] text-[var(--text-500)] tabular-nums">
+                        {{ $c->full_document }}
                     </td>
 
                     {{-- Cuentas --}}
                     <td class="px-6 py-5 text-center hidden md:table-cell">
-                        <p class="text-[14px] text-[var(--text-700)]">{{ $summary['count_total'] }}</p>
-                        <p class="text-[12px] text-[var(--text-400)] mt-0.5">{{ $summary['count_total'] === 1 ? 'cuenta' : 'cuentas' }}</p>
+                        <p class="text-[14px] text-[var(--text-500)] tabular-nums">{{ $summary['count_total'] }}</p>
                     </td>
 
                     {{-- Facturado --}}
                     <td class="px-6 py-5 text-right hidden lg:table-cell">
-                        <p class="text-[14px] text-[var(--text-700)]">$ {{ number_format($totalInv, 0, ',', '.') }}</p>
+                        <p class="text-[14px] text-[var(--text-500)] tabular-nums">$ {{ number_format($totalInv, 0, ',', '.') }}</p>
                     </td>
 
                     {{-- Cobrado --}}
                     <td class="px-6 py-5 text-right hidden lg:table-cell">
-                        <p class="text-[14px] text-[var(--color-success)] font-medium">$ {{ number_format($summary['total_paid'], 0, ',', '.') }}</p>
+                        <p class="text-[14px] text-[var(--color-success)] tabular-nums">$ {{ number_format($summary['total_paid'], 0, ',', '.') }}</p>
                         @if($totalInv > 0)
-                        <div class="mt-2 h-1 bg-[var(--surface-muted)] rounded-full overflow-hidden w-20 ml-auto">
+                        <div class="mt-2 h-1.5 bg-[var(--surface-muted)] rounded-full overflow-hidden w-20 ml-auto">
                             <div class="h-full {{ $paidPct >= 100 ? 'bg-[var(--color-success)]' : 'bg-[var(--color-primary)]' }} rounded-full"
                                  style="width: {{ $paidPct }}%"></div>
                         </div>
@@ -156,13 +162,19 @@ $agingBuckets = [
 
                     {{-- Saldo --}}
                     <td class="px-6 py-5 text-right">
-                        <p class="text-[14px] font-semibold {{ $balance <= 0 ? 'text-[var(--color-success)]' : ($hasOverdue ? 'text-[var(--color-danger)]' : 'text-[var(--text-900)]') }}">
+                        <p class="text-[14px] tabular-nums {{ $balance <= 0 ? 'text-[var(--color-success)]' : 'text-[var(--text-500)]' }}">
                             $ {{ number_format($balance, 0, ',', '.') }}
                         </p>
+                    </td>
+
+                    {{-- Días --}}
+                    <td class="px-6 py-5 text-right hidden lg:table-cell">
                         @if($hasOverdue && $daysOv > 0)
-                        <p class="text-[11px] text-[var(--color-danger)] mt-0.5">{{ $daysOv }}d vencida</p>
+                        <p class="text-[14px] text-[var(--color-danger)] tabular-nums">{{ $daysOv }}</p>
                         @elseif($balance <= 0)
-                        <p class="text-[11px] text-[var(--color-success)] mt-0.5">Al día</p>
+                        <p class="text-[13px] text-[var(--color-success)]">Al día</p>
+                        @else
+                        <p class="text-[var(--border-strong)] text-[14px]">—</p>
                         @endif
                     </td>
 
@@ -207,11 +219,11 @@ $agingBuckets = [
                             <div class="w-16 h-16 bg-[var(--surface-muted)] rounded-[var(--radius-card)] flex items-center justify-center">
                                 <x-lucide-wallet class="w-8 h-8 text-[var(--text-400)]" />
                             </div>
-                            <div>
-                                <p class="text-[14px] font-semibold text-[var(--text-700)]">
+            <div>
+                                <p class="text-[15px] font-semibold text-[var(--text-700)]">
                                     @if($search) Sin clientes con ese criterio @else No hay cuentas en cartera @endif
                                 </p>
-                                <p class="text-[12px] text-[var(--text-400)] mt-1">
+                                <p class="text-[13px] text-[var(--text-400)] mt-1">
                                     @if($search)
                                         <a href="{{ route('cartera.index') }}" class="text-[var(--color-primary)] hover:underline">Limpiar búsqueda</a>
                                     @else
@@ -221,7 +233,7 @@ $agingBuckets = [
                             </div>
                             @unless($search)
                             <a href="{{ route('invoices.create') }}"
-                               class="h-10 px-5 flex items-center bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded-[var(--radius-control)] text-[14px] font-medium">
+                               class="h-10 px-5 flex items-center bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded-[var(--radius-control)] text-[15px] font-medium">
                                 Nueva cuenta de cobro
                             </a>
                             @endunless
@@ -231,6 +243,7 @@ $agingBuckets = [
                 @endforelse
             </tbody>
         </table>
+    </div>
     </div>
 </div>
 
@@ -262,7 +275,7 @@ $agingBuckets = [
                     <x-lucide-mail class="w-5 h-5 text-[var(--color-primary)]" />
                 </div>
                 <div>
-                    <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Enviar estado de cuenta</h2>
+                    <h2 class="text-[16px] font-bold text-[var(--text-900)]">Enviar estado de cuenta</h2>
                     <p class="text-[12px] text-[var(--text-400)] mt-0.5" x-text="stmtName + ' · PDF adjunto'"></p>
                 </div>
             </div>
@@ -384,7 +397,7 @@ $agingBuckets = [
                             <x-lucide-wallet class="w-4 h-4 text-[var(--color-primary)]" />
                         </div>
                         <div>
-                            <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Agregar pago o abono</h2>
+                            <h2 class="text-[16px] font-bold text-[var(--text-900)]">Agregar pago o abono</h2>
                             <p class="text-[12px] text-[var(--text-400)] mt-0.5">
                                 <span x-show="step === 'clientes'">Selecciona el cliente</span>
                                 <span x-show="step === 'cuentas'" x-text="clienteActivo?.name"></span>
@@ -546,16 +559,15 @@ $agingBuckets = [
                                                :value="'/cartera/cliente/' + (clienteActivo?.id || '')">
 
                                         <div class="grid grid-cols-2 gap-3 mb-3">
-                                            <div>
+                                            <div x-data="{ monto: cuenta.balance }">
                                                 <label class="block text-[12px] font-medium text-[var(--text-700)] mb-1">
                                                     Monto <span class="text-[var(--color-danger)]">*</span>
                                                 </label>
                                                 <div class="relative">
                                                     <span class="absolute inset-y-0 left-2.5 flex items-center text-[var(--text-400)] text-[12px]">$</span>
-                                                    <input type="number"
+                                                    <input type="text"
                                                            name="amount"
-                                                           :value="cuenta.balance.toFixed(2)"
-                                                           min="0.01" step="0.01"
+                                                           x-money="monto"
                                                            class="w-full pl-6 pr-2 h-9 border border-[var(--border-default)] rounded-[var(--radius-control)] text-[14px] bg-[var(--surface-card)] focus:ring-2 focus:ring-[var(--color-primary-light)] focus:border-[var(--color-primary)] outline-none">
                                                 </div>
                                             </div>

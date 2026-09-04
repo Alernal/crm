@@ -235,6 +235,10 @@ class CarteraController extends Controller
             ->where('user_id', auth()->id())
             ->where('client_id', $client->id)
             ->whereNotIn('status', ['cancelled', 'draft'])
+            ->where(function ($q) {
+                $q->whereYear('issue_date', now()->year)
+                  ->orWhereIn('status', ['sent', 'overdue']);
+            })
             ->orderBy('issue_date')
             ->orderBy('id')
             ->get();
@@ -264,6 +268,10 @@ class CarteraController extends Controller
             ->where('user_id', auth()->id())
             ->where('client_id', $client->id)
             ->whereNotIn('status', ['cancelled', 'draft'])
+            ->where(function ($q) {
+                $q->whereYear('issue_date', now()->year)
+                  ->orWhereIn('status', ['sent', 'overdue']);
+            })
             ->orderBy('issue_date')
             ->orderBy('id')
             ->get();

@@ -54,8 +54,6 @@
     .logo-box {
         width: 130pt;
         height: 65pt;
-        border: 1pt solid #ddd;
-        background: #fafafa;
         overflow: hidden;
         display: flex;
         align-items: center;
@@ -162,7 +160,7 @@
     .payment-section {
         margin-top: 22pt;
         padding: 10pt 12pt;
-        border: 0.5pt solid #ddd;
+        border: 0.25pt solid #999999;
         background: #fafafa;
     }
     .payment-title {
@@ -174,15 +172,7 @@
     .payment-link { font-size: 8.5pt; color: #444; margin-top: 6pt; }
     .payment-link a { color: #1a56db; }
 
-    /* ── Pie ── */
-    .footer {
-        margin-top: 28pt;
-        padding-top: 10pt;
-        border-top: 0.5pt solid #ccc;
-        text-align: center;
-        font-size: 7.5pt;
-        color: #888;
-    }
+
 </style>
 </head>
 <body>
@@ -218,7 +208,6 @@
             <div class="party-name">{{ $user->name }}</div>
             <div class="party-detail">
                 @if($user->nit)NIT: {{ $user->nit }}<br/>@endif
-                @if($user->professional_card_number)T.P. {{ $user->professional_card_number }} — Contador Público<br/>@endif
                 @if($user->address){{ $user->address }}@if($user->city), {{ $user->city }}@endif<br/>
                 @elseif($user->city){{ $user->city }}<br/>@endif
                 @if($user->phone)Tel: {{ $user->phone }}<br/>@endif
@@ -226,7 +215,7 @@
             </div>
         </div>
         <div class="party-col">
-            <div class="section-label">Facturar a</div>
+            <div class="section-label">Cobrar a</div>
             <div class="party-name">{{ $invoice->client->name }}</div>
             <div class="party-detail">
                 {{ $invoice->client->document_type }}: {{ $invoice->client->full_document }}<br/>
@@ -347,10 +336,6 @@
     </div>
     @endif
 
-    {{-- Pie --}}
-    <div class="footer">
-        Elaborado por <strong>ALERNAL S.A.S.</strong> — Construyendo el mañana
-    </div>
 
 </div>
 </body>

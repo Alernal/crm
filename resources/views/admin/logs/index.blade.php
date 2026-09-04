@@ -117,7 +117,7 @@
 
     @if ($logs->hasPages())
         <div class="px-5 py-4 border-t border-gray-200">
-            {{ $logs->withQueryString()->links() }}
+            {{ $logs->withQueryString()->links('pagination::tailwind') }}
         </div>
     @endif
 </div>

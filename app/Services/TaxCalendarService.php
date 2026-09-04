@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Client;
 use App\Models\TaxDueDate;
+use App\Models\TaxEvent;
 use App\Models\TaxObligationType;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -12,6 +13,66 @@ class TaxCalendarService
 {
     /** Obligaciones de Renta/RST cuya fecha "Activos en el Exterior" hereda, en orden de prioridad. */
     private const ACTIVOS_EXTERIOR_SOURCES = ['RENTA_GC', 'RENTA_JUR', 'RENTA_NAT', 'SIMPLE_DEC'];
+
+    /**
+     * Une las obligaciones manuales (TaxEvent: manual/ica/dian) del cliente con las
+     * calculadas automáticamente (generateClientCalendar) para un año — fuente única
+     * reutilizada por TaxCalendarController::allCalendarItems() (calendario mensual),
+     * TaxCalendarController::index() (badges del listado) y TaxAlertsComposer (campana
+     * del top bar), que antes cada uno contaba una fuente distinta (manual-only o
+     * calculado-only) y por eso mostraban totales de "vencidos" distintos entre sí para
+     * el mismo cliente.
+     */
+    public function combinedEvents(Client $client, int $year): Collection
+    {
+        $manualEvents = collect($client->taxEvents()->whereYear('due_date', $year)->get());
+
+        // Las filas con source=calculado son la marca de cumplimiento persistida para una
+        // ocurrencia CALCULADA (ver TaxCalendarController::completeOccurrence()) — no se
+        // muestran como una fila manual aparte, sino que sobreescriben el estado del ítem
+        // calculado equivalente (mismo obligation_type + due_date) más abajo.
+        $completedCalculated = $manualEvents
+            ->where('source', 'calculado')
+            ->where('status', 'completed')
+            ->keyBy(fn (TaxEvent $e) => $e->obligation_type.'|'.$e->due_date->toDateString());
+
+        $manual = $manualEvents
+            ->reject(fn (TaxEvent $e) => $e->source === 'calculado')
+            ->map(fn (TaxEvent $e) => [
+                'id'              => $e->id,
+                'title'           => $e->title,
+                'due_date'        => $e->due_date,
+                'obligation_type' => $e->obligation_type,
+                'period'          => $e->period,
+                'status'          => $e->status === 'completed' ? 'completed' : ($e->status === 'overdue' || ($e->status === 'pending' && $e->due_date->isPast()) ? 'overdue' : 'pending'),
+                'source'          => $e->source,
+                'notes'           => $e->notes,
+                'alert_days'      => $e->alert_days,
+                'editable'        => true,
+            ]);
+
+        $calculated = collect($this->generateClientCalendar($client->id, $year))
+            ->values()
+            ->map(function (array $e, int $i) use ($completedCalculated, $year) {
+                $key       = $e['code'].'|'.$e['due_date'];
+                $completed = $completedCalculated->get($key);
+
+                return [
+                    'id'              => "calc-{$e['code']}-{$year}-{$i}",
+                    'title'           => $e['name'].' — '.$e['period_label'],
+                    'due_date'        => Carbon::parse($e['due_date']),
+                    'obligation_type' => $e['code'],
+                    'period'          => $e['period_label'],
+                    'status'          => $completed ? 'completed' : ($e['status'] === 'vencido' ? 'overdue' : 'pending'),
+                    'source'          => 'calculado',
+                    'notes'           => null,
+                    'alert_days'      => 15,
+                    'editable'        => false,
+                ];
+            });
+
+        return $manual->concat($calculated);
+    }
 
     public function generateClientCalendar(int $clientId, int $year): array
     {

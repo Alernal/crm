@@ -19,10 +19,21 @@ class TaxCalendarController extends Controller
         $user    = Auth::user();
         $clients = $user->clients()->where('status', 'active')->orderBy('name')->get();
 
-        $eventsByClient = $user->taxEvents()
-            ->select('client_id', 'status', 'due_date')
-            ->get()
-            ->groupBy('client_id');
+        $service     = new TaxCalendarService();
+        $currentYear = (int) date('Y');
+        $horizonYear = (int) now()->addDays(30)->format('Y');
+
+        // Combina manual + calculado por cliente (mismo criterio que allCalendarItems()) —
+        // antes solo se contaban las filas TaxEvent manuales, así que un cliente con
+        // obligaciones calculadas vencidas mostraba "sin vencimientos" en este listado.
+        $eventsByClient = $clients->mapWithKeys(function ($client) use ($service, $currentYear, $horizonYear) {
+            $items = $service->combinedEvents($client, $currentYear);
+            if ($horizonYear !== $currentYear) {
+                $items = $items->concat($service->combinedEvents($client, $horizonYear));
+            }
+
+            return [$client->id => $items->unique('id')];
+        });
 
         return view('tax-calendar.index', compact('clients', 'eventsByClient'));
     }
@@ -103,36 +114,81 @@ class TaxCalendarController extends Controller
      */
     private function allCalendarItems(Client $client, int $year): Collection
     {
-        $manual = collect($client->taxEvents()->whereYear('due_date', $year)->get())
-            ->map(fn (TaxEvent $e) => [
-                'id'              => $e->id,
-                'title'           => $e->title,
-                'due_date'        => $e->due_date,
-                'obligation_type' => $e->obligation_type,
-                'period'          => $e->period,
-                'status'          => $e->status === 'completed' ? 'completed' : ($e->status === 'overdue' || ($e->status === 'pending' && $e->due_date->isPast()) ? 'overdue' : 'pending'),
-                'source'          => $e->source,
-                'notes'           => $e->notes,
-                'alert_days'      => $e->alert_days,
-                'editable'        => true,
-            ]);
+        return (new TaxCalendarService())->combinedEvents($client, $year);
+    }
 
-        $calculated = collect((new TaxCalendarService())->generateClientCalendar($client->id, $year))
-            ->values()
-            ->map(fn (array $e, int $i) => [
-                'id'              => "calc-{$e['code']}-{$year}-{$i}",
-                'title'           => $e['name'] . ' — ' . $e['period_label'],
-                'due_date'        => Carbon::parse($e['due_date']),
-                'obligation_type' => $e['code'],
-                'period'          => $e['period_label'],
-                'status'          => $e['status'] === 'vencido' ? 'overdue' : 'pending',
-                'source'          => 'calculado',
-                'notes'           => null,
-                'alert_days'      => 15,
-                'editable'        => false,
-            ]);
+    /**
+     * Obligaciones manuales (TaxEvent: manual/ica/dian — nunca 'calculado') del cliente para
+     * un año, en el mismo formato de array que generateClientCalendar() para que
+     * clientCalendar() pueda mostrarlas en la misma tabla que las calculadas — antes esa
+     * vista solo llamaba a generateClientCalendar() y por eso obligaciones puramente
+     * manuales como ICA (sin TaxDueDate propio) nunca aparecían ahí, aunque sí las contara
+     * la campana de notificaciones (desincronización que originó este fix).
+     */
+    private function manualEventsForYear(Client $client, int $year): array
+    {
+        return $client->taxEvents()
+            ->whereYear('due_date', $year)
+            ->where('source', '!=', 'calculado')
+            ->get()
+            ->map(function (TaxEvent $e) {
+                $status = $e->status === 'completed'
+                    ? 'completado'
+                    : (($e->status === 'overdue' || $e->due_date->isPast())
+                        ? 'vencido'
+                        : ($e->due_date->diffInDays(now()) <= 15 ? 'proximo' : 'pendiente'));
 
-        return $manual->concat($calculated);
+                return [
+                    'id'           => $e->id,
+                    'code'         => $e->obligation_type,
+                    'name'         => $e->title,
+                    'period_label' => $e->period ?: $e->title,
+                    'due_date'     => $e->due_date->toDateString(),
+                    'periodicity'  => null,
+                    'regime'       => null,
+                    'status'       => $status,
+                    'days_left'    => (int) now()->diffInDays($e->due_date, false),
+                    'editable'     => true,
+                    'source'       => $e->source,
+                ];
+            })
+            ->all();
+    }
+
+    /**
+     * Mapa obligation_type|due_date => true de las ocurrencias CALCULADAS que el usuario ya
+     * marcó como cumplidas para este cliente — usado por clientCalendar() para que la vista
+     * de calendario anual muestre "Cumplida" en vez de "Vencida" una vez gestionada.
+     */
+    private function completedCalculatedKeys(Client $client): array
+    {
+        return $client->taxEvents()
+            ->where('source', 'calculado')
+            ->where('status', 'completed')
+            ->get(['obligation_type', 'due_date'])
+            ->map(fn (TaxEvent $e) => $e->obligation_type.'|'.$e->due_date->toDateString())
+            ->flip()
+            ->map(fn () => true)
+            ->all();
+    }
+
+    /**
+     * Sobreescribe status='vencido' → 'completado' en la lista de $events (formato
+     * TaxCalendarService) para las ocurrencias que el cliente ya marcó como cumplidas.
+     * Usado por clientCalendar()/exportPdf() — el mismo criterio de reconciliación que
+     * allCalendarItems() aplica para el calendario mensual de show().
+     */
+    private function applyCompletions(array $events, Client $client): array
+    {
+        $completed = $this->completedCalculatedKeys($client);
+
+        return array_map(function (array $e) use ($completed) {
+            if (isset($completed[$e['code'].'|'.$e['due_date']])) {
+                $e['status'] = 'completado';
+            }
+
+            return $e;
+        }, $events);
     }
 
     public function storeICA(Request $request, Client $client)
@@ -232,13 +288,72 @@ class TaxCalendarController extends Controller
         return response()->json(['success' => true, 'message' => 'Obligación actualizada.']);
     }
 
-    public function complete(TaxEvent $taxEvent)
+    public function complete(Request $request, TaxEvent $taxEvent)
     {
         abort_unless($taxEvent->user_id === Auth::id(), 403);
 
         $taxEvent->update(['status' => 'completed']);
 
-        return response()->json(['success' => true, 'message' => 'Marcada como cumplida.']);
+        // El modal de show.blade.php llama este endpoint por fetch (Accept: application/json);
+        // el formulario plano de client-calendar.blade.php (obligaciones manuales, ej. ICA)
+        // es una navegación normal de navegador — sin esta rama volvía a una página JSON en
+        // blanco en vez de refrescar la tabla (mismo bug ya corregido antes en completeOccurrence()).
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Marcada como cumplida.']);
+        }
+
+        return back()->with('status', 'Obligación marcada como cumplida.');
+    }
+
+    /**
+     * Marca como cumplida una ocurrencia CALCULADA (TaxCalendarService) — a diferencia de
+     * complete(), que actúa sobre una fila TaxEvent que ya existe, aquí la fila no existe
+     * todavía: se identifica la ocurrencia por obligation_type+due_date (no hay id) y se crea
+     * o reutiliza la fila-marca (source=calculado) que allCalendarItems()/clientCalendar()
+     * usan para sobreescribir el estado "vencido" calculado al vuelo.
+     */
+    public function completeOccurrence(Request $request, Client $client)
+    {
+        $this->authorizeClient($client);
+
+        $data = $request->validate([
+            'obligation_type' => 'required|string|max:30',
+            'due_date'        => 'required|date',
+            'title'           => 'nullable|string|max:200',
+        ]);
+
+        // No se usa firstOrNew() con un array de atributos: el cast 'date' de due_date
+        // persiste la columna como datetime completo ('Y-m-d H:i:s'), así que comparar
+        // contra el string plano 'Y-m-d' recibido del form nunca hace match y crea una
+        // fila duplicada en cada clic — whereDate() compara solo la parte de fecha.
+        $event = TaxEvent::where('user_id', Auth::id())
+            ->where('client_id', $client->id)
+            ->where('obligation_type', $data['obligation_type'])
+            ->where('source', 'calculado')
+            ->whereDate('due_date', $data['due_date'])
+            ->first() ?? new TaxEvent([
+                'user_id'         => Auth::id(),
+                'client_id'       => $client->id,
+                'obligation_type' => $data['obligation_type'],
+                'due_date'        => $data['due_date'],
+                'source'          => 'calculado',
+            ]);
+
+        $event->title      = $data['title'] ?? $data['obligation_type'];
+        $event->period     = $event->period ?? null;
+        $event->alert_days = $event->alert_days ?? 10;
+        $event->status     = 'completed';
+        $event->save();
+
+        // El modal de show.blade.php llama este endpoint por fetch (Accept: application/json);
+        // el formulario plano de client-calendar.blade.php es una navegación normal de
+        // navegador — sin esta rama volvía a la pantalla como una página JSON en blanco
+        // en vez de refrescar la tabla.
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Marcada como cumplida.']);
+        }
+
+        return back()->with('status', 'Obligación marcada como cumplida.');
     }
 
     public function destroy(TaxEvent $taxEvent)
@@ -262,7 +377,12 @@ class TaxCalendarController extends Controller
         $filterStatus= $request->get('status');
 
         $service = new TaxCalendarService();
-        $events  = $service->generateClientCalendar($client->id, $year);
+        $manual  = $this->manualEventsForYear($client, $year);
+        $events  = array_merge(
+            $this->applyCompletions($service->generateClientCalendar($client->id, $year), $client),
+            $manual
+        );
+        usort($events, fn($a, $b) => strcmp($a['due_date'], $b['due_date']));
 
         if ($filterCode) {
             $events = array_filter($events, fn($e) => $e['code'] === $filterCode);
@@ -280,6 +400,7 @@ class TaxCalendarController extends Controller
                    '7'=>'Julio','8'=>'Agosto','9'=>'Septiembre','10'=>'Octubre','11'=>'Noviembre','12'=>'Diciembre'];
 
         $obligationCodes = collect($service->generateClientCalendar($client->id, $year))
+            ->concat($manual)
             ->pluck('name', 'code')->unique()->toArray();
 
         return view('tax-calendar.client-calendar', compact(
@@ -294,7 +415,7 @@ class TaxCalendarController extends Controller
 
         $year    = $request->integer('year', date('Y'));
         $service = new TaxCalendarService();
-        $events  = $service->generateClientCalendar($client->id, $year);
+        $events  = $this->applyCompletions($service->generateClientCalendar($client->id, $year), $client);
 
         $pdf = Pdf::loadView('tax-calendar.client-calendar-pdf', compact('client', 'events', 'year'));
 

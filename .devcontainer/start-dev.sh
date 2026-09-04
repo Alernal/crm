@@ -10,11 +10,11 @@ LOG_DIR="storage/logs"
 mkdir -p "$LOG_DIR"
 
 if ! ss -tln 2>/dev/null | grep -q ':8000 '; then
-    nohup php artisan serve --host=0.0.0.0 --port=8000 > "$LOG_DIR/artisan-serve.log" 2>&1 &
+    setsid nohup php artisan serve --host=0.0.0.0 --port=8000 > "$LOG_DIR/artisan-serve.log" 2>&1 < /dev/null &
     disown
 fi
 
 if ! ss -tln 2>/dev/null | grep -q ':5173 '; then
-    nohup npm run dev > "$LOG_DIR/vite-dev.log" 2>&1 &
+    setsid nohup npm run dev > "$LOG_DIR/vite-dev.log" 2>&1 < /dev/null &
     disown
 fi

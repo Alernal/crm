@@ -1,6 +1,6 @@
 <x-guest-layout>
     <div class="mb-8">
-        <h2 class="text-[22px] font-semibold text-[var(--text-900)]">Confirmar contraseña</h2>
+        <h1 class="text-[22px] font-bold text-[var(--text-900)]">Confirmar contraseña</h1>
         <p class="mt-2 text-[var(--text-500)] text-[14px]">
             {{ __('Esta es un área segura de la aplicación. Confirma tu contraseña antes de continuar.') }}
         </p>

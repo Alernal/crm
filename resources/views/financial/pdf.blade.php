@@ -25,37 +25,10 @@
         margin-bottom: 14pt;
         border-bottom: 2pt solid #111111;
     }
-    .header-left {
-        width: 38%;
-        float: left;
-    }
     .header-right {
-        width: 60%;
-        float: right;
+        width: 100%;
         text-align: right;
         padding-top: 4pt;
-    }
-
-    .logo-box {
-        width: 120pt;
-        height: 60pt;
-        border: 1pt solid #dddddd;
-        background: #fafafa;
-        text-align: center;
-        line-height: 60pt;
-        font-size: 0;
-        overflow: hidden;
-    }
-    .logo-box img {
-        display: inline-block;
-        vertical-align: middle;
-        max-width: 114pt;
-        max-height: 54pt;
-        line-height: normal;
-    }
-    .logo-empty {
-        width: 120pt;
-        height: 60pt;
     }
 
     .doc-title {
@@ -197,6 +170,95 @@
         background: #f0f0f0;
     }
 
+    /* ── Estados Financieros: tabla minimalista, sin líneas — jerarquía solo por negrita/tamaño ── */
+    .stmt-doc .header { border-bottom: none; padding-bottom: 6pt; }
+
+    table.stmt {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    table.stmt th {
+        font-size: 6.5pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.5pt;
+        color: #999999;
+        padding: 0 4pt 8pt 4pt;
+        text-align: right;
+        border: none;
+        background: none;
+    }
+    table.stmt th.concept { text-align: left; }
+    table.stmt td {
+        font-size: 8pt;
+        font-weight: normal;
+        color: #333333;
+        padding: 3.5pt 4pt;
+        text-align: right;
+        border: none;
+        background: none;
+        vertical-align: top;
+    }
+    table.stmt td.concept { text-align: left; padding-left: 12pt; }
+
+    tr.stmt-group td {
+        padding-top: 15pt;
+        padding-bottom: 3pt;
+        font-size: 7.5pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #111111;
+        border: none;
+        background: none;
+    }
+    tr.stmt-group td.concept { padding-left: 0; }
+
+    tr.stmt-section td {
+        padding-top: 8pt;
+        padding-bottom: 2pt;
+        font-size: 7pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.6pt;
+        color: #777777;
+        border: none;
+        background: none;
+    }
+    tr.stmt-section td.concept { padding-left: 0; }
+
+    tr.stmt-total td {
+        font-weight: bold;
+        font-size: 8pt;
+        color: #111111;
+        padding-top: 5pt;
+        padding-bottom: 5pt;
+        border: none;
+        background: none;
+    }
+    tr.stmt-total td.concept { padding-left: 0; }
+
+    tr.stmt-highlight td {
+        font-weight: bold;
+        font-size: 9.5pt;
+        color: #111111;
+        padding-top: 7pt;
+        padding-bottom: 7pt;
+        border: none;
+        background: none;
+    }
+    tr.stmt-highlight td.concept { padding-left: 0; }
+
+    /* ── Flujo de caja: Ppto/Real/Var% ── */
+    .cashflow-table { font-size: 6pt; }
+    .cashflow-table th, .cashflow-table td { font-size: 6pt; padding: 3pt 2.5pt; }
+    .cashflow-table th.period-group { text-align: center; border-left: 0.5pt solid #cccccc; }
+    .cashflow-table th.sub { font-size: 5.5pt; text-align: right; border-left: 0.5pt solid #eeeeee; border-top: none; }
+    .cashflow-table td.real { color: #059669; }
+    .cashflow-table td.var-pos { color: #059669; }
+    .cashflow-table td.var-neg { color: #DC2626; }
+    .cashflow-table td { border-left: 0.5pt solid #f3f3f3; }
+    td.neg, .budget-table td.neg { color: #DC2626; }
+
     /* ── Notas ── */
     .notes-wrap { margin-top: 14pt; }
     .notes-title {
@@ -223,44 +285,99 @@
         color: #888888;
         line-height: 1.6;
     }
+
+    /* ── Firmas (Estados Financieros) ── */
+    .signatures {
+        width: 100%;
+        margin-top: 34pt;
+    }
+    .signature-box {
+        float: left;
+        width: 46%;
+        text-align: center;
+    }
+    .signature-box + .signature-box {
+        float: right;
+    }
+    .signature-line {
+        border-top: 0.75pt solid #111111;
+        margin-bottom: 5pt;
+        padding-top: 5pt;
+    }
+    .signature-name {
+        font-size: 8.5pt;
+        font-weight: bold;
+        color: #111111;
+    }
+    .signature-detail {
+        font-size: 7.5pt;
+        color: #666666;
+        margin-top: 1pt;
+    }
+    .signature-role {
+        font-size: 7pt;
+        text-transform: uppercase;
+        letter-spacing: 0.6pt;
+        color: #888888;
+        margin-top: 3pt;
+    }
 </style>
 </head>
 <body>
-<div class="page">
 
-    @php
-        $typeLabels   = \App\Models\Budget::TYPES;
-        $statusLabels = \App\Models\Budget::STATUS_LABELS;
-        $periodTypes  = \App\Models\Budget::PERIOD_TYPES;
-        $sl           = $statusLabels[$budget->status] ?? $statusLabels['draft'];
-        $isFlujoCaja  = $budget->type === 'flujo_caja';
-        $colCount     = count($periodLabels);
-        $conceptWidth = 20;
-        $periodWidth  = (100 - $conceptWidth) / max($colCount, 1);
-    @endphp
+@php
+    $typeLabels   = \App\Models\Budget::TYPES;
+    $statusLabels = \App\Models\Budget::STATUS_LABELS;
+    $periodTypes  = \App\Models\Budget::PERIOD_TYPES;
+    $sl           = $statusLabels[$budget->status] ?? $statusLabels['draft'];
+    $isFlujoCaja  = $budget->type === 'flujo_caja';
+    $isEsf        = $budget->type === 'esf' && $esfReport !== null;
+    $isEri        = $budget->type === 'eri' && $eriReport !== null;
+    $isStatement  = $isEsf || $isEri;
+    $colCount     = count($periodLabels);
+    $conceptWidth = $isStatement ? max(38, 60 - ($colCount * 4)) : 20;
+    $periodWidth  = (100 - $conceptWidth) / max($colCount, 1);
+    $fmtNumber  = fn ($v) => number_format($v, 0, ',', '.');
+    $signerRole   = 'Representante Legal';
+    // Identificación PERSONAL del contador que firma — siempre cédula/CE/pasaporte,
+    // nunca NIT (un NIT es un registro tributario, no un documento de identidad).
+    // Mismo criterio que CertificateSignatureClauseResolver/CompanyPlaceholderProvider.
+    // Abreviatura ("C.C.") para la firma, igual que en Contratos/Propuestas/Certificados.
+    $accountantIdType   = \App\Services\DocumentEngine\Providers\ClientPlaceholderProvider::documentTypeAbbreviation($user->identification_type ?: 'CC');
+    $accountantIdNumber = $user->identification_number ?: $user->nit;
+@endphp
 
-    {{-- ===== CABECERA ===== --}}
+<div class="page {{ $isStatement ? 'stmt-doc' : '' }}">
+
+    {{-- ===== CABECERA =====
+         Sin logo a propósito — este documento se emite a nombre del
+         contador, no como papelería con marca del cliente/firma, a
+         diferencia de Cuentas de Cobro y Certificado de Ingresos (a pedido
+         explícito del usuario). El bloque ocupa el 100% del ancho (antes
+         compartía fila con el logo al 60%), lo que de paso deja el título
+         en una sola línea. --}}
     <div class="header clearfix">
-        <div class="header-left">
-            @if($user->logo_path && file_exists(storage_path('app/public/' . $user->logo_path)))
-            <div class="logo-box">
-                <img src="{{ storage_path('app/public/' . $user->logo_path) }}" alt="Logo" />
+        <div class="header-right">
+            @if($isStatement)
+            <div class="doc-title">{{ $isEsf ? 'ESTADO DE SITUACIÓN FINANCIERA' : 'ESTADO DE RESULTADOS' }}</div>
+            <div class="doc-number">{{ $budget->client->name }}</div>
+            <div class="doc-dates">
+                {{ $budget->client->document_type }}: {{ $budget->client->full_document }}<br/>
+                A corte {{ ($budget->cutoff_date ?? $budget->periodEndDate($budget->periods_count))->locale('es')->isoFormat('D [de] MMMM [de] YYYY') }}<br/>
+                Cifras expresadas en pesos colombianos (COP)
             </div>
             @else
-            <div class="logo-empty"></div>
-            @endif
-        </div>
-
-        <div class="header-right">
             <div class="doc-title">{{ strtoupper($typeLabels[$budget->type] ?? 'PRESUPUESTO') }}</div>
             <div class="doc-number">{{ $budget->name }}</div>
             <div class="doc-dates">
                 <strong>Estado:</strong> {{ $sl['label'] }}<br/>
                 <strong>Fecha de generación:</strong> {{ now()->locale('es')->isoFormat('D [de] MMMM [de] YYYY') }}<br/>
             </div>
+            @endif
         </div>
     </div>
 
+    @unless($isStatement)
     {{-- ===== CLIENTE ===== --}}
     <div class="client-block">
         <div class="section-label">Presupuesto para</div>
@@ -279,7 +396,7 @@
     {{-- ===== META ===== --}}
     <div class="meta-bar clearfix">
         <div class="meta-item">
-            <div class="meta-label">Año base</div>
+            <div class="meta-label">Período base</div>
             <div class="meta-value">{{ $budget->base_year }}</div>
         </div>
         <div class="meta-item">
@@ -298,6 +415,92 @@
 
     {{-- ===== TABLA DE PRESUPUESTO ===== --}}
     <div class="section-title">Detalle por período</div>
+    @endunless
+
+    @if($isFlujoCaja && $cashFlowReport)
+    @php $cfConceptWidth = 16; $cfPeriodWidth = (100 - $cfConceptWidth) / max($colCount, 1); @endphp
+    <table class="budget-table cashflow-table">
+        <thead>
+            <tr>
+                <th class="concept" rowspan="2" style="width:{{ $cfConceptWidth }}%">Concepto</th>
+                @foreach($periodLabels as $idx => $label)
+                <th class="period-group" colspan="3" style="width:{{ $cfPeriodWidth }}%">{{ $label }}{{ $idx === 0 ? ' (base)' : '' }}</th>
+                @endforeach
+            </tr>
+            <tr>
+                @foreach($periodLabels as $idx => $label)
+                <th class="sub">Ppto</th>
+                <th class="sub">Real</th>
+                <th class="sub">Var%</th>
+                @endforeach
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($cashFlowReport['rows'] as $row)
+                @if($row['type'] === 'section')
+                <tr class="section-row">
+                    <td class="concept" colspan="{{ 1 + ($colCount * 3) }}">{{ $row['label'] }}</td>
+                </tr>
+                @else
+                @php
+                    $rowClass  = $row['type'] === 'total' ? 'total-row' : (in_array($row['type'], ['highlight', 'final'], true) ? 'grand-total-row' : '');
+                    $isOutflow = $row['is_outflow'] ?? false;
+                @endphp
+                <tr class="{{ $rowClass }}">
+                    <td class="concept">{{ $row['label'] }}</td>
+                    @foreach($periodLabels as $idx => $label)
+                    @php
+                        $ppto = $row['values'][$idx]['ppto'] ?? 0.0;
+                        $real = $row['values'][$idx]['real'] ?? 0.0;
+                        $var  = $ppto != 0.0 ? (($real - $ppto) / abs($ppto)) * 100 : null;
+                    @endphp
+                    <td class="{{ $isOutflow ? 'neg' : '' }}">{{ $ppto == 0 ? '—' : ($isOutflow ? '-$ ' : '$ ') . number_format(abs($ppto), 0, ',', '.') }}</td>
+                    <td class="{{ $isOutflow ? 'neg' : 'real' }}">{{ $real == 0 ? '—' : ($isOutflow ? '-$ ' : '$ ') . number_format(abs($real), 0, ',', '.') }}</td>
+                    <td class="{{ $var === null ? '' : ($var >= 0 ? 'var-pos' : 'var-neg') }}">{{ $var === null ? '—' : number_format($var, 1) . '%' }}</td>
+                    @endforeach
+                </tr>
+                @endif
+            @endforeach
+        </tbody>
+    </table>
+    @elseif($isEsf || $isEri)
+    @php
+        $statementReport = $isEsf ? $esfReport : $eriReport;
+        $visibleRows      = \App\Models\Budget::filterStatementRowsForPrint($statementReport['rows'], $isEri);
+    @endphp
+    <table class="stmt">
+        <thead>
+            <tr>
+                <th class="concept" style="width:{{ $conceptWidth }}%">Concepto</th>
+                @foreach($periodLabels as $idx => $label)
+                <th style="width:{{ $periodWidth }}%">{{ $label }}</th>
+                @endforeach
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($visibleRows as $row)
+                @if($row['type'] === 'group')
+                <tr class="stmt-group">
+                    <td class="concept" colspan="{{ 1 + $colCount }}">{{ $row['label'] }}</td>
+                </tr>
+                @elseif($row['type'] === 'section')
+                <tr class="stmt-section">
+                    <td class="concept" colspan="{{ 1 + $colCount }}">{{ $row['label'] }}</td>
+                </tr>
+                @else
+                @php $rowClass = $row['type'] === 'highlight' ? 'stmt-highlight' : ($row['type'] === 'total' ? 'stmt-total' : ''); @endphp
+                <tr class="{{ $rowClass }}">
+                    <td class="concept">{{ $row['label'] }}</td>
+                    @foreach($periodLabels as $idx => $label)
+                    @php $v = $row['values'][$idx] ?? 0; @endphp
+                    <td class="{{ $v < 0 ? 'neg' : '' }}">{{ $v < 0 ? '-$ ' : '$ ' }}{{ $fmtNumber(abs($v)) }}</td>
+                    @endforeach
+                </tr>
+                @endif
+            @endforeach
+        </tbody>
+    </table>
+    @else
     <table class="budget-table">
         <thead>
             <tr>
@@ -324,7 +527,7 @@
                     $signedVal = $line->sign_negative ? -$val : $val;
                     $sectionTotals[$idx] += $signedVal;
                 @endphp
-                <td>$ {{ number_format($val, 0, ',', '.') }}</td>
+                <td class="{{ $line->sign_negative ? 'neg' : '' }}">{{ $line->sign_negative ? '-$ ' : '$ ' }}{{ number_format($val, 0, ',', '.') }}</td>
                 @endforeach
             </tr>
             @endforeach
@@ -333,21 +536,20 @@
                 <td class="concept">Total {{ $section->name }}</td>
                 @foreach($periodLabels as $idx => $label)
                 @php $grandTotals[$idx] += $sectionTotals[$idx]; @endphp
-                <td>$ {{ number_format($sectionTotals[$idx], 0, ',', '.') }}</td>
+                <td class="{{ $sectionTotals[$idx] < 0 ? 'neg' : '' }}">{{ $sectionTotals[$idx] < 0 ? '-$ ' : '$ ' }}{{ number_format(abs($sectionTotals[$idx]), 0, ',', '.') }}</td>
                 @endforeach
             </tr>
             @endforeach
 
-            @if(!$isFlujoCaja)
             <tr class="grand-total-row">
                 <td class="concept">TOTAL GENERAL</td>
                 @foreach($periodLabels as $idx => $label)
-                <td>$ {{ number_format($grandTotals[$idx], 0, ',', '.') }}</td>
+                <td class="{{ $grandTotals[$idx] < 0 ? 'neg' : '' }}">{{ $grandTotals[$idx] < 0 ? '-$ ' : '$ ' }}{{ number_format(abs($grandTotals[$idx]), 0, ',', '.') }}</td>
                 @endforeach
             </tr>
-            @endif
         </tbody>
     </table>
+    @endif
 
     {{-- ===== NOTAS ===== --}}
     @if($budget->notes)
@@ -357,10 +559,35 @@
     </div>
     @endif
 
+    {{-- ===== FIRMAS (Estados Financieros) ===== --}}
+    @if($isEsf || $isEri)
+    <div class="signatures clearfix">
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <div class="signature-name">{{ $budget->client->name }}</div>
+            <div class="signature-detail">{{ $budget->client->document_type }}: {{ $budget->client->full_document }}</div>
+            <div class="signature-role">{{ $signerRole }}</div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <div class="signature-name">{{ $user->name }}</div>
+            @if($accountantIdNumber)
+            <div class="signature-detail">{{ $accountantIdType }} No. {{ $accountantIdNumber }}</div>
+            @endif
+            @if($user->professional_card_number)
+            <div class="signature-detail">T.P. {{ $user->professional_card_number }}</div>
+            @endif
+            <div class="signature-role">Contador Público</div>
+        </div>
+    </div>
+    @endif
+
     {{-- ===== PIE ===== --}}
+    @unless($isStatement)
     <div class="footer">
         Elaborado por <strong>ALERNAL S.A.S.</strong> - Construyendo el manana
     </div>
+    @endunless
 
 </div>
 </body>

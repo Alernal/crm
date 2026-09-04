@@ -22,7 +22,7 @@
     $fieldClass = 'w-full h-10 px-3.5 border border-[var(--border-default)] rounded-[var(--radius-control)] text-[14px] bg-[var(--surface-card)] text-[var(--text-700)] focus:ring-2 focus:ring-[var(--color-primary-light)] focus:border-[var(--color-primary)] outline-none';
 @endphp
 
-<div class="max-w-5xl mx-auto"
+<div class="pt-6"
      x-data="{
          ...clientPayModal(),
          modalStatement: false,
@@ -49,30 +49,30 @@
     title="Estado de cuenta"></iframe>
 
 {{-- ── Breadcrumb + Header ─────────────────────────────────── --}}
-<div class="flex items-start justify-between mb-6 gap-4">
+<div class="flex items-start justify-between mb-10 gap-4">
     <div>
-        <nav class="flex items-center gap-1.5 text-[14px] text-[var(--text-400)] mb-2">
-            <a href="{{ route('cartera.index') }}" class="hover:text-[var(--color-primary)]">Cartera</a>
-            <x-lucide-chevron-right class="w-3.5 h-3.5" />
-            <span class="text-[var(--text-700)] font-medium truncate">{{ $client->name }}</span>
-        </nav>
-        <h1 class="text-[22px] font-semibold text-[var(--text-900)]">{{ $client->name }}</h1>
+        <a href="{{ route('cartera.index') }}"
+           class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[14px] font-medium text-[var(--text-700)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-900)] mb-6">
+            <x-lucide-arrow-left class="w-4 h-4" />
+            Volver
+        </a>
+        <p class="text-[22px] font-bold text-[var(--text-900)]">{{ $client->name }}</p>
         <p class="text-[14px] text-[var(--text-500)] mt-1 font-mono">{{ $client->document_type }} {{ $client->full_document }}</p>
     </div>
     <div class="flex items-center gap-2 flex-shrink-0">
         <a href="{{ route('clients.show', $client) }}"
-           class="h-10 flex items-center px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+           class="h-10 flex items-center px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
             Ficha del cliente
         </a>
         @if($client->email)
         <button @click="modalStatement = true"
-                class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+                class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
             <x-lucide-mail class="w-4 h-4" />
             Enviar estado de cuenta
         </button>
         @endif
         <button @click="isPrinting = true"
-                class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+                class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
             <x-lucide-printer class="w-4 h-4" />
             Estado de cuenta
         </button>
@@ -86,7 +86,9 @@
 
 {{-- ── Flash ───────────────────────────────────────────────── --}}
 @if(session('success'))
-<div class="mb-5 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
+<div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)" x-show="show"
+     x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+     class="mb-5 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
     <x-lucide-check-circle class="w-4 h-4 flex-shrink-0" />
     {{ session('success') }}
 </div>
@@ -155,17 +157,24 @@
 @else
 
 <div class="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] overflow-hidden">
+    <div class="overflow-x-auto p-3">
+    <div class="overflow-y-auto max-h-[65vh]">
     <table class="w-full">
         <thead>
-            <tr class="border-b border-[var(--border-default)]">
-                <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left">Cuenta</th>
-                <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-right">Total</th>
-                <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-right hidden sm:table-cell">Abonado</th>
-                <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-right">Saldo</th>
-                <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 hidden lg:table-cell">Progreso</th>
-                <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left hidden md:table-cell">Vencimiento</th>
-                <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left">Estado</th>
-                <th class="px-6 py-3 w-36"></th>
+            <tr>
+                @php
+                    $thClass = 'sticky top-0 z-[1] bg-[var(--surface-card)] border-b border-[var(--border-default)] text-[13px] font-bold text-[var(--text-900)] px-6 py-3.5';
+                @endphp
+                <th class="{{ $thClass }} text-left">Cuenta</th>
+                <th class="{{ $thClass }} text-left hidden sm:table-cell">Emisión</th>
+                <th class="{{ $thClass }} text-right">Total</th>
+                <th class="{{ $thClass }} text-right hidden sm:table-cell">Abonado</th>
+                <th class="{{ $thClass }} text-right">Saldo</th>
+                <th class="{{ $thClass }} text-left hidden lg:table-cell">Progreso</th>
+                <th class="{{ $thClass }} text-left hidden md:table-cell">Vencimiento</th>
+                <th class="{{ $thClass }} text-left hidden md:table-cell">Días</th>
+                <th class="{{ $thClass }} text-left">Estado</th>
+                <th class="{{ $thClass }} text-right w-24">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -188,28 +197,31 @@
                 $barColor = $paidPct >= 100 ? 'bg-[var(--color-success)]' : ($paidPct > 0 ? 'bg-[var(--color-primary)]' : 'bg-[var(--surface-muted)]');
             @endphp
 
-            <tr class="border-b border-[var(--surface-muted)] hover:bg-[var(--surface-subtle)]">
+            <tr class="border-b border-[var(--surface-muted)] border-l-[3px] border-l-transparent hover:border-l-[var(--color-primary)] hover:bg-[var(--surface-subtle)]">
 
                 <td class="px-6 py-4">
-                    <a href="{{ route('cartera.show', $invoice) }}"
-                       class="font-medium text-[13px] text-[var(--color-primary)] hover:underline">
+                    <a href="{{ route('invoices.show', $invoice) }}"
+                       class="text-[14px] text-[var(--color-primary)] hover:underline">
                         {{ $invoice->number }}
                     </a>
-                    <p class="text-[12px] text-[var(--text-400)] mt-0.5">{{ $invoice->issue_date->format('d/m/Y') }}</p>
+                </td>
+
+                <td class="px-6 py-4 hidden sm:table-cell">
+                    <p class="text-[14px] text-[var(--text-500)]">{{ $invoice->issue_date->format('d/m/Y') }}</p>
                 </td>
 
                 <td class="px-6 py-4 text-right">
-                    <p class="text-[14px] text-[var(--text-700)]">$ {{ number_format($invoice->total, 0, ',', '.') }}</p>
+                    <p class="text-[14px] text-[var(--text-700)] tabular-nums">$ {{ number_format($invoice->total, 0, ',', '.') }}</p>
                 </td>
 
                 <td class="px-6 py-4 text-right hidden sm:table-cell">
-                    <p class="text-[14px] {{ $paidAmount > 0 ? 'text-[var(--color-success)] font-medium' : 'text-[var(--border-strong)]' }}">
+                    <p class="text-[14px] tabular-nums {{ $paidAmount > 0 ? 'text-[var(--color-success)]' : 'text-[var(--border-strong)]' }}">
                         $ {{ number_format($paidAmount, 0, ',', '.') }}
                     </p>
                 </td>
 
                 <td class="px-6 py-4 text-right">
-                    <p class="text-[14px] font-semibold {{ $invBalance <= 0 ? 'text-[var(--color-success)]' : ($invoice->status === 'overdue' ? 'text-[var(--color-danger)]' : 'text-[var(--text-900)]') }}">
+                    <p class="text-[14px] tabular-nums {{ $invBalance <= 0 ? 'text-[var(--color-success)]' : 'text-[var(--text-900)]' }}">
                         $ {{ number_format(max(0, $invBalance), 0, ',', '.') }}
                     </p>
                 </td>
@@ -219,22 +231,27 @@
                         <div class="flex-1 h-1.5 bg-[var(--surface-muted)] rounded-full overflow-hidden">
                             <div class="h-full {{ $barColor }} rounded-full" style="width: {{ $paidPct }}%"></div>
                         </div>
-                        <span class="text-[12px] text-[var(--text-400)] tabular-nums w-8 text-right">{{ $paidPct }}%</span>
+                        <span class="text-[13px] text-[var(--text-400)] tabular-nums w-8 text-right">{{ $paidPct }}%</span>
                     </div>
                 </td>
 
                 <td class="px-6 py-4 hidden md:table-cell">
                     @if($invoice->due_date)
-                        <p class="text-[14px] {{ $daysOverdue > 0 ? 'text-[var(--color-danger)] font-semibold' : 'text-[var(--text-700)]' }}">
+                        <p class="text-[14px] text-[var(--text-700)]">
                             {{ $invoice->due_date->format('d/m/Y') }}
                         </p>
-                        @if($daysOverdue > 0)
-                            <p class="text-[11px] text-[var(--color-danger)] mt-0.5">{{ $daysOverdue }}d vencida</p>
-                        @elseif($daysLeft !== null && $invoice->status !== 'paid')
-                            <p class="text-[11px] text-[var(--text-400)] mt-0.5">{{ $daysLeft === 0 ? 'Vence hoy' : "Vence en {$daysLeft}d" }}</p>
-                        @endif
                     @else
                         <span class="text-[var(--border-strong)]">—</span>
+                    @endif
+                </td>
+
+                <td class="px-6 py-4 hidden md:table-cell">
+                    @if($daysOverdue > 0)
+                        <p class="text-[14px] text-[var(--color-danger)] tabular-nums">{{ $daysOverdue }}</p>
+                    @elseif($daysLeft !== null && $invoice->status !== 'paid')
+                        <p class="text-[13px] text-[var(--text-400)]">{{ $daysLeft === 0 ? 'Vence hoy' : "Vence en {$daysLeft}" }}</p>
+                    @else
+                        <span class="text-[var(--border-strong)] text-[14px]">—</span>
                     @endif
                 </td>
 
@@ -244,7 +261,7 @@
 
                 <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end gap-[10px]">
-                        <a href="{{ route('cartera.show', $invoice) }}"
+                        <a href="{{ route('invoices.show', $invoice) }}"
                            title="Ver detalle"
                            class="text-[var(--text-400)] hover:text-[var(--text-900)]">
                             <x-lucide-eye class="w-4 h-4" />
@@ -267,9 +284,9 @@
                                     balance: {{ max(0, $invBalance) }},
                                     from: '{{ route('cartera.client', $client) }}'
                                 })"
-                                class="inline-flex items-center gap-1.5 px-3 h-8 bg-[var(--color-success)] hover:opacity-90 text-white rounded-[var(--radius-control)] text-[12px] font-medium">
-                            <x-lucide-plus class="w-3.5 h-3.5" />
-                            Registrar pago
+                                title="Registrar pago"
+                                class="text-[var(--text-400)] hover:text-[var(--text-900)]">
+                            <x-lucide-wallet class="w-4 h-4" />
                         </button>
                         @endif
                     </div>
@@ -278,6 +295,8 @@
             @endforeach
         </tbody>
     </table>
+    </div>
+    </div>
 </div>
 @endif
 
@@ -311,7 +330,7 @@
                     <x-lucide-mail class="w-5 h-5 text-[var(--color-primary)]" />
                 </div>
                 <div>
-                    <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Enviar estado de cuenta</h2>
+                    <h2 class="text-[16px] font-bold text-[var(--text-900)]">Enviar estado de cuenta</h2>
                     <p class="text-[12px] text-[var(--text-400)] mt-0.5">{{ $client->name }} · PDF adjunto</p>
                 </div>
             </div>
@@ -424,7 +443,7 @@
                     <x-lucide-mail class="w-5 h-5 text-[var(--color-primary)]" />
                 </div>
                 <div>
-                    <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Enviar cuenta por correo</h2>
+                    <h2 class="text-[16px] font-bold text-[var(--text-900)]">Enviar cuenta por correo</h2>
                     <p class="text-[12px] text-[var(--text-400)] mt-0.5">
                         No. <span class="font-mono font-semibold" x-text="invoiceEmailNumber"></span> · PDF adjunto
                     </p>
@@ -511,7 +530,7 @@
                     <x-lucide-wallet class="w-4 h-4 text-[var(--color-primary)]" />
                 </div>
                 <div>
-                    <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Registrar pago</h2>
+                    <h2 class="text-[16px] font-bold text-[var(--text-900)]">Registrar pago</h2>
                     <p class="text-[12px] text-[var(--text-400)] mt-0.5">
                         <span class="font-mono" x-text="invoiceNumber"></span>
                         · Saldo: <span x-text="formatCOP(balance)"></span>
@@ -538,10 +557,9 @@
                     </label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-3 flex items-center text-[var(--text-400)] text-[14px]">$</span>
-                        <input type="number"
+                        <input type="text"
                                name="amount"
-                               :value="balance.toFixed(2)"
-                               min="0.01" step="0.01"
+                               x-money="amount"
                                class="{{ $fieldClass }} pl-7">
                     </div>
                 </div>
@@ -628,12 +646,14 @@ function clientPayModal() {
         formAction: '',
         invoiceNumber: '',
         balance: 0,
+        amount: 0,
         fromUrl: '',
 
         abrir(data) {
             this.formAction    = data.action;
             this.invoiceNumber = data.number;
             this.balance       = data.balance;
+            this.amount        = data.balance;
             this.fromUrl       = data.from;
             this.open          = true;
         },

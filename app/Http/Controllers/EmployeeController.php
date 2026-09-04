@@ -53,6 +53,10 @@ class EmployeeController extends Controller
     {
         $data = array_merge($request->validated(), ['pension_exempt' => $request->boolean('pension_exempt')]);
 
+        if (empty($data['termination_reason'])) {
+            $data['termination_date'] = null;
+        }
+
         abort_unless(
             $request->user()->clients()->where('id', $data['client_id'])->exists(),
             403
@@ -88,6 +92,10 @@ class EmployeeController extends Controller
         abort_if($employee->user_id !== $request->user()->id, 403);
 
         $data = array_merge($request->validated(), ['pension_exempt' => $request->boolean('pension_exempt')]);
+
+        if (empty($data['termination_reason'])) {
+            $data['termination_date'] = null;
+        }
 
         abort_unless(
             $request->user()->clients()->where('id', $data['client_id'])->exists(),

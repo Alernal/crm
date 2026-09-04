@@ -3,16 +3,18 @@
 
 <div class="max-w-3xl mx-auto">
 
-    {{-- Breadcrumb --}}
-    <nav class="flex items-center gap-1.5 text-[14px] text-[var(--text-400)] mb-5">
-        <a href="{{ route('services.index') }}" class="hover:text-[var(--color-primary)]">Servicios</a>
-        <x-lucide-chevron-right class="w-3.5 h-3.5" />
-        <span class="text-[var(--text-700)] font-medium truncate">{{ $service->name }}</span>
-    </nav>
+    {{-- Volver --}}
+    <a href="{{ route('services.index') }}"
+       class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[14px] font-medium text-[var(--text-700)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-900)] mb-5">
+        <x-lucide-arrow-left class="w-4 h-4" />
+        Volver
+    </a>
 
     {{-- Flash --}}
     @if(session('success'))
-    <div class="mb-4 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
+    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)" x-show="show"
+         x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="mb-4 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
         <x-lucide-check-circle class="w-4 h-4 flex-shrink-0" />
         {{ session('success') }}
     </div>
@@ -26,7 +28,7 @@
                     <x-lucide-briefcase class="w-6 h-6 text-[var(--color-primary)]" />
                 </div>
                 <div>
-                    <h1 class="text-[22px] font-semibold text-[var(--text-900)]">{{ $service->name }}</h1>
+                    <p class="text-[22px] font-bold text-[var(--text-900)]">{{ $service->name }}</p>
                     @if($service->description)
                     <p class="text-[14px] text-[var(--text-500)] mt-1 max-w-lg">{{ $service->description }}</p>
                     @endif
@@ -34,7 +36,7 @@
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
                 <a href="{{ route('services.edit', $service) }}"
-                   class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+                   class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
                     <x-lucide-edit-2 class="w-4 h-4" />
                     Editar
                 </a>
@@ -43,7 +45,7 @@
                       x-on:submit.prevent="if(confirm('¿Eliminar «{{ addslashes($service->name) }}»? Esta acción no se puede deshacer.')) $el.submit()">
                     @csrf @method('DELETE')
                     <button type="submit"
-                            class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--color-danger)]/30 text-[var(--color-danger)] text-[14px] font-medium hover:bg-[var(--color-danger-bg)]">
+                            class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border bg-[var(--color-danger-bg)]/50 border-[var(--color-danger)]/30 text-[var(--color-danger)] text-[14px] font-medium hover:bg-[var(--color-danger-bg)]">
                         <x-lucide-trash-2 class="w-4 h-4" />
                         Eliminar
                     </button>
@@ -56,7 +58,7 @@
     <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
 
         <div class="px-6 py-5 border-b border-[var(--border-default)]">
-            <h2 class="text-[16px] font-semibold text-[var(--text-900)] mb-4">Precio y condiciones</h2>
+            <h2 class="text-[16px] font-bold text-[var(--text-900)] mb-4">Precio y condiciones</h2>
             <dl class="grid grid-cols-2 sm:grid-cols-3 gap-5">
                 <div>
                     <dt class="text-[11px] text-[var(--text-400)] font-medium uppercase tracking-[0.06em] mb-0.5">Precio base</dt>
@@ -87,7 +89,7 @@
         </div>
 
         <div class="px-6 py-5 border-b border-[var(--border-default)]">
-            <h2 class="text-[16px] font-semibold text-[var(--text-900)] mb-4">Estado del servicio</h2>
+            <h2 class="text-[16px] font-bold text-[var(--text-900)] mb-4">Estado del servicio</h2>
             <div class="flex items-center gap-3">
                 @if($service->status === 'active')
                 <x-status-badge variant="success">Activo</x-status-badge>

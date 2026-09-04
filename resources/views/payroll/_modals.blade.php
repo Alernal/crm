@@ -12,7 +12,12 @@
 
             <div class="flex items-center justify-between px-6 py-5 border-b border-[var(--border-default)]">
                 <div>
-                    <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Editar conceptos</h2>
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Editar conceptos</h2>
+                        <x-help-icon title="Editar conceptos">
+                            Valores manuales del período: lo que no se calcula automáticamente (comisiones, bonificaciones, viáticos, préstamos, etc.). Salario básico, auxilio de transporte, seguridad social y prestaciones se recalculan solos al guardar.
+                        </x-help-icon>
+                    </div>
                     <p class="text-[12px] text-[var(--text-400)] mt-0.5" x-text="conceptos.row?.employee_name"></p>
                 </div>
                 <button @click="conceptos.open = false" class="p-2 rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)] text-[var(--text-400)] hover:text-[var(--text-700)]">
@@ -32,35 +37,35 @@
                 <div>
                     <p class="text-[12px] font-semibold text-[var(--text-400)] uppercase tracking-[0.05em] mb-2">Devengado salarial</p>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Comisiones</label><input type="number" step="0.01" min="0" name="commissions" x-model.number="conceptos.form.commissions" class="{{ $fieldClass }}"></div>
-                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Bonificaciones salariales</label><input type="number" step="0.01" min="0" name="bonuses_salarial" x-model.number="conceptos.form.bonuses_salarial" class="{{ $fieldClass }}"></div>
-                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Viáticos permanentes</label><input type="number" step="0.01" min="0" name="per_diem_salarial" x-model.number="conceptos.form.per_diem_salarial" class="{{ $fieldClass }}"></div>
-                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Otros pagos salariales</label><input type="number" step="0.01" min="0" name="other_salarial" x-model.number="conceptos.form.other_salarial" class="{{ $fieldClass }}"></div>
+                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Comisiones</label><input type="text" name="commissions" x-money="conceptos.form.commissions" class="{{ $fieldClass }}"></div>
+                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Bonificaciones salariales</label><input type="text" name="bonuses_salarial" x-money="conceptos.form.bonuses_salarial" class="{{ $fieldClass }}"></div>
+                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Viáticos permanentes</label><input type="text" name="per_diem_salarial" x-money="conceptos.form.per_diem_salarial" class="{{ $fieldClass }}"></div>
+                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Otros pagos salariales</label><input type="text" name="other_salarial" x-money="conceptos.form.other_salarial" class="{{ $fieldClass }}"></div>
                     </div>
                 </div>
 
                 <div>
                     <p class="text-[12px] font-semibold text-[var(--text-400)] uppercase tracking-[0.05em] mb-2">Devengado no salarial</p>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Bonificaciones ocasionales</label><input type="number" step="0.01" min="0" name="occasional_bonuses" x-model.number="conceptos.form.occasional_bonuses" class="{{ $fieldClass }}"></div>
-                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Primas extralegales</label><input type="number" step="0.01" min="0" name="extralegal_premiums" x-model.number="conceptos.form.extralegal_premiums" class="{{ $fieldClass }}"></div>
-                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Viáticos (no salariales)</label><input type="number" step="0.01" min="0" name="per_diem_no_salarial" x-model.number="conceptos.form.per_diem_no_salarial" class="{{ $fieldClass }}"></div>
-                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Otros no salariales</label><input type="number" step="0.01" min="0" name="other_no_salarial" x-model.number="conceptos.form.other_no_salarial" class="{{ $fieldClass }}"></div>
+                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Bonificaciones ocasionales</label><input type="text" name="occasional_bonuses" x-money="conceptos.form.occasional_bonuses" class="{{ $fieldClass }}"></div>
+                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Primas extralegales</label><input type="text" name="extralegal_premiums" x-money="conceptos.form.extralegal_premiums" class="{{ $fieldClass }}"></div>
+                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Viáticos (no salariales)</label><input type="text" name="per_diem_no_salarial" x-money="conceptos.form.per_diem_no_salarial" class="{{ $fieldClass }}"></div>
+                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Otros no salariales</label><input type="text" name="other_no_salarial" x-money="conceptos.form.other_no_salarial" class="{{ $fieldClass }}"></div>
                     </div>
                 </div>
 
                 <div>
                     <p class="text-[12px] font-semibold text-[var(--text-400)] uppercase tracking-[0.05em] mb-2">Deducciones</p>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Préstamos a empleados</label><input type="number" step="0.01" min="0" name="loans_deduction" x-model.number="conceptos.form.loans_deduction" class="{{ $fieldClass }}"></div>
-                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Retención en la fuente</label><input type="number" step="0.01" min="0" name="withholding_tax" x-model.number="conceptos.form.withholding_tax" class="{{ $fieldClass }}"></div>
-                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Otras deducciones</label><input type="number" step="0.01" min="0" name="other_deductions" x-model.number="conceptos.form.other_deductions" class="{{ $fieldClass }}"></div>
+                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Préstamos a empleados</label><input type="text" name="loans_deduction" x-money="conceptos.form.loans_deduction" class="{{ $fieldClass }}"></div>
+                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Retención en la fuente</label><input type="text" name="withholding_tax" x-money="conceptos.form.withholding_tax" class="{{ $fieldClass }}"></div>
+                        <div><label class="block text-[13px] text-[var(--text-700)] mb-1">Otras deducciones</label><input type="text" name="other_deductions" x-money="conceptos.form.other_deductions" class="{{ $fieldClass }}"></div>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-3 pt-2 border-t border-[var(--border-default)]">
                     <button type="submit" class="h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">Guardar</button>
-                    <button type="button" @click="conceptos.open = false" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">Cancelar</button>
+                    <button type="button" @click="conceptos.open = false" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">Cancelar</button>
                 </div>
             </form>
             </template>
@@ -86,7 +91,12 @@
                         <x-lucide-clock class="w-4 h-4 text-[var(--color-primary)]" />
                     </div>
                     <div>
-                        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Horas extra y recargos</h2>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-[16px] font-bold text-[var(--text-900)]">Horas extra y recargos</h2>
+                            <x-help-icon title="Horas extra y recargos">
+                                Registra las horas por cada tipo legal (diurna, nocturna, dominical/festiva...) — la tarifa por hora y el total se calculan solos según el salario del empleado y los factores de recargo vigentes.
+                            </x-help-icon>
+                        </div>
                         <p class="text-[12px] text-[var(--text-400)] mt-0.5" x-text="overtime.row?.employee_name"></p>
                     </div>
                 </div>
@@ -142,7 +152,7 @@
                         <p class="text-[18px] font-bold text-[var(--text-900)]" x-text="'$ ' + fmt(overtimeTotal)"></p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <button type="button" @click="overtime.open = false" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">Cancelar</button>
+                        <button type="button" @click="overtime.open = false" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">Cancelar</button>
                         <button type="submit" class="h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">Guardar</button>
                     </div>
                 </div>
@@ -166,7 +176,7 @@
 
             <div class="flex items-center justify-between px-6 py-5 border-b border-[var(--border-default)]">
                 <div>
-                    <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Enviar desprendible</h2>
+                    <h2 class="text-[16px] font-bold text-[var(--text-900)]">Enviar desprendible</h2>
                     <p class="text-[12px] text-[var(--text-400)] mt-0.5" x-text="email.row?.employee_name"></p>
                 </div>
                 <button @click="email.open = false" class="p-2 rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)] text-[var(--text-400)] hover:text-[var(--text-700)]">
@@ -189,7 +199,7 @@
 
                 <div class="flex items-center gap-3 pt-2">
                     <button type="submit" class="h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">Enviar</button>
-                    <button type="button" @click="email.open = false" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">Cancelar</button>
+                    <button type="button" @click="email.open = false" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">Cancelar</button>
                 </div>
             </form>
             </template>

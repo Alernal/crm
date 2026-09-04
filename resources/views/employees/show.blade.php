@@ -3,14 +3,16 @@
 
 <div class="max-w-5xl mx-auto space-y-5">
 
-    <nav class="flex items-center gap-1.5 text-[14px] text-[var(--text-400)] mb-1">
-        <a href="{{ route('employees.index', [], false) }}" class="hover:text-[var(--color-primary)]">Empleados</a>
-        <x-lucide-chevron-right class="w-3.5 h-3.5" />
-        <span class="text-[var(--text-700)] font-medium truncate">{{ $employee->full_name }}</span>
-    </nav>
+    <a href="{{ route('employees.index', [], false) }}"
+       class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[14px] font-medium text-[var(--text-700)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-900)] mb-1">
+        <x-lucide-arrow-left class="w-4 h-4" />
+        Volver
+    </a>
 
     @if(session('success'))
-    <div class="flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
+    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)" x-show="show"
+         x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
         <x-lucide-check-circle class="w-4 h-4 flex-shrink-0" />
         {{ session('success') }}
     </div>
@@ -24,7 +26,7 @@
                     {{ strtoupper(substr($employee->first_name, 0, 1) . substr($employee->last_name, 0, 1)) }}
                 </div>
                 <div>
-                    <h1 class="text-[22px] font-semibold text-[var(--text-900)]">{{ $employee->full_name }}</h1>
+                    <p class="text-[22px] font-bold text-[var(--text-900)]">{{ $employee->full_name }}</p>
                     <p class="text-[14px] text-[var(--text-500)] mt-0.5">
                         {{ $employee->document_type }} {{ $employee->document_number }}
                         &bull; {{ $employee->position ?? 'Sin cargo asignado' }}
@@ -40,8 +42,15 @@
             </div>
 
             <div class="flex items-center gap-2 flex-shrink-0">
+                @if($employee->termination_date && $employee->termination_reason && $employee->contract_type !== 'aprendizaje')
+                <a href="{{ route('contract-settlements.create', ['employee_id' => $employee->id], false) }}"
+                   class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">
+                    <x-lucide-file-minus class="w-4 h-4" />
+                    Liquidar contrato
+                </a>
+                @endif
                 <a href="{{ route('employees.edit', $employee, false) }}"
-                   class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+                   class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
                     <x-lucide-edit-2 class="w-4 h-4" />
                     Editar
                 </a>
@@ -50,7 +59,7 @@
                       x-on:submit.prevent="if(confirm('¿Eliminar a {{ addslashes($employee->full_name) }}? Esta acción no se puede deshacer.')) $el.submit()">
                     @csrf @method('DELETE')
                     <button type="submit"
-                            class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--color-danger)]/30 text-[var(--color-danger)] text-[14px] font-medium hover:bg-[var(--color-danger-bg)]">
+                            class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border bg-[var(--color-danger-bg)]/50 border-[var(--color-danger)]/30 text-[var(--color-danger)] text-[14px] font-medium hover:bg-[var(--color-danger-bg)]">
                         <x-lucide-trash-2 class="w-4 h-4" />
                         Eliminar
                     </button>
@@ -118,7 +127,12 @@
     {{-- ===== NÓMINAS RECIENTES ===== --}}
     <div class="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] overflow-hidden">
         <div class="px-6 py-4 border-b border-[var(--border-default)] flex items-center justify-between">
-            <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Desprendibles recientes</h2>
+            <div class="flex items-center gap-2">
+                <h2 class="text-[16px] font-bold text-[var(--text-900)]">Desprendibles recientes</h2>
+                <x-help-icon title="Desprendibles recientes">
+                    Los últimos períodos de nómina en los que este empleado tuvo un desprendible generado, más recientes primero. Para editar conceptos de un período específico, entra al período completo desde "Períodos de Nómina".
+                </x-help-icon>
+            </div>
             <a href="{{ route('payroll-periods.index', ['client_id' => $employee->client_id], false) }}" class="text-[13px] text-[var(--color-primary)] hover:underline font-medium">
                 Ver períodos de nómina
             </a>
@@ -128,27 +142,30 @@
             <p class="text-[14px] text-[var(--text-500)]">Este empleado aún no tiene nóminas generadas.</p>
         </div>
         @else
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto p-3">
             <table class="w-full">
                 <thead>
-                    <tr class="border-b border-[var(--border-default)]">
-                        <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left">Período</th>
-                        <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-right">Devengado</th>
-                        <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-right">Neto pagado</th>
-                        <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-center">Estado</th>
+                    <tr>
+                        @php
+                            $thClass = 'bg-[var(--surface-card)] border-b border-[var(--border-default)] text-[13px] font-bold text-[var(--text-900)] uppercase tracking-[0.06em] px-6 py-3.5';
+                        @endphp
+                        <th class="{{ $thClass }} text-left">Período</th>
+                        <th class="{{ $thClass }} text-right">Devengado</th>
+                        <th class="{{ $thClass }} text-right">Neto pagado</th>
+                        <th class="{{ $thClass }} text-center">Estado</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($recentPayrolls as $payroll)
-                    <tr class="border-b border-[var(--surface-muted)] hover:bg-[var(--surface-subtle)]">
+                    <tr class="border-b border-[var(--surface-muted)] border-l-[3px] border-l-transparent hover:border-l-[var(--color-primary)] hover:bg-[var(--surface-subtle)]">
                         <td class="px-6 py-[14px]">
-                            <a href="{{ route('payroll-periods.show', $payroll->payrollPeriod, false) }}" class="text-[14px] font-medium text-[var(--text-900)] hover:text-[var(--color-primary)]">
+                            <a href="{{ route('payroll-periods.show', $payroll->payrollPeriod, false) }}" class="text-[14px] text-[var(--text-900)] hover:text-[var(--color-primary)]">
                                 {{ $payroll->payrollPeriod->number }}
                             </a>
-                            <p class="text-[12px] text-[var(--text-400)]">{{ $payroll->payrollPeriod->start_date->format('d/m/Y') }} – {{ $payroll->payrollPeriod->end_date->format('d/m/Y') }}</p>
+                            <p class="text-[13px] text-[var(--text-400)]">{{ $payroll->payrollPeriod->start_date->format('d/m/Y') }} – {{ $payroll->payrollPeriod->end_date->format('d/m/Y') }}</p>
                         </td>
-                        <td class="px-6 py-[14px] text-right text-[14px] text-[var(--text-700)]">$ {{ number_format($payroll->total_earned, 0, ',', '.') }}</td>
-                        <td class="px-6 py-[14px] text-right text-[14px] font-semibold text-[var(--text-900)]">$ {{ number_format($payroll->net_pay, 0, ',', '.') }}</td>
+                        <td class="px-6 py-[14px] text-right text-[14px] text-[var(--text-700)] tabular-nums">$ {{ number_format($payroll->total_earned, 0, ',', '.') }}</td>
+                        <td class="px-6 py-[14px] text-right text-[14px] text-[var(--text-900)] tabular-nums">$ {{ number_format($payroll->net_pay, 0, ',', '.') }}</td>
                         <td class="px-6 py-[14px] text-center">
                             <x-status-badge :variant="match($payroll->status) { 'pagada' => 'success', 'emitida' => 'info', 'anulada' => 'neutral', default => 'warning' }">
                                 {{ \App\Models\Payroll::STATUSES[$payroll->status] }}

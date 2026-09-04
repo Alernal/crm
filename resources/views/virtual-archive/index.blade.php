@@ -6,16 +6,18 @@
     {{-- ENCABEZADO --}}
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-[22px] font-semibold text-[var(--text-900)]">Archivo Virtual</h1>
+            <p class="text-[22px] font-bold text-[var(--text-900)]">Archivo Virtual</p>
             <p class="text-[14px] text-[var(--text-500)]">{{ $client->name }} · {{ $client->full_document }}</p>
         </div>
-        <a href="{{ route('finance.client', $client) }}"
+        <a href="{{ route('financial.client', $client) }}"
            class="text-[13px] text-[var(--color-primary)] hover:underline">← Finanzas del cliente</a>
     </div>
 
     {{-- ALERTAS --}}
     @if(session('success'))
-    <div class="bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">{{ session('success') }}</div>
+    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)" x-show="show"
+         x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">{{ session('success') }}</div>
     @endif
     @if($errors->any())
     <div class="bg-[var(--color-danger-bg)] border border-[var(--color-danger)]/20 text-[var(--color-danger-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">{{ $errors->first() }}</div>
@@ -62,7 +64,7 @@
 
                 {{-- Nueva carpeta --}}
                 <button @click="$refs.folderModal.classList.remove('hidden')"
-                        class="inline-flex items-center gap-1.5 h-9 px-3.5 border border-[var(--border-default)] text-[var(--text-700)] text-[13px] font-medium rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)]">
+                        class="inline-flex items-center gap-1.5 h-9 px-3.5 bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[13px] font-medium rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)]">
                     <x-lucide-folder class="w-4 h-4" />
                     Nueva carpeta
                 </button>
@@ -98,32 +100,36 @@
 
             {{-- CONTENIDO: ARCHIVOS --}}
             @if($files->count())
-            <div class="flex-1 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] overflow-hidden">
+            <div class="flex-1 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] overflow-hidden">
+                <div class="overflow-x-auto p-3">
                 <table class="w-full">
                     <thead>
+                        @php
+                            $thClass = 'text-[13px] font-bold text-[var(--text-900)] px-4 py-3.5';
+                        @endphp
                         <tr class="border-b border-[var(--border-default)]">
-                            <th class="text-left px-4 py-3 text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em]">Nombre</th>
-                            <th class="text-left px-4 py-3 text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] hidden sm:table-cell">Tipo</th>
-                            <th class="text-right px-4 py-3 text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] hidden sm:table-cell">Tamaño</th>
-                            <th class="text-right px-4 py-3 text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] hidden md:table-cell">Fecha</th>
-                            <th class="px-4 py-3"></th>
+                            <th class="{{ $thClass }} text-left">Nombre</th>
+                            <th class="{{ $thClass }} text-left hidden sm:table-cell">Tipo</th>
+                            <th class="{{ $thClass }} text-right hidden sm:table-cell">Tamaño</th>
+                            <th class="{{ $thClass }} text-right hidden md:table-cell">Fecha</th>
+                            <th class="px-4 py-3.5"></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($files as $file)
-                        <tr class="border-b border-[var(--surface-muted)] hover:bg-[var(--surface-subtle)]">
+                        <tr class="border-b border-[var(--surface-muted)] border-l-[3px] border-l-transparent hover:border-l-[var(--color-primary)] hover:bg-[var(--surface-subtle)]">
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-2">
                                     <span class="text-[16px]">{{ fileIcon($file->mime_type) }}</span>
                                     <a href="{{ route('archive.files.download', [$client, $file]) }}"
-                                       class="text-[14px] text-[var(--color-primary)] hover:underline truncate max-w-xs">
+                                       class="text-[14px] text-[var(--text-500)] hover:text-[var(--color-primary)] truncate max-w-xs">
                                         {{ $file->original_filename }}
                                     </a>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-[13px] text-[var(--text-500)] hidden sm:table-cell">{{ strtoupper($file->extension()) }}</td>
-                            <td class="px-4 py-3 text-[13px] text-[var(--text-500)] text-right hidden sm:table-cell">{{ $file->humanSize() }}</td>
-                            <td class="px-4 py-3 text-[13px] text-[var(--text-500)] text-right hidden md:table-cell">{{ $file->created_at->format('d/m/Y') }}</td>
+                            <td class="px-4 py-3 text-[14px] text-[var(--text-500)] hidden sm:table-cell">{{ strtoupper($file->extension()) }}</td>
+                            <td class="px-4 py-3 text-[14px] text-[var(--text-500)] text-right hidden sm:table-cell">{{ $file->humanSize() }}</td>
+                            <td class="px-4 py-3 text-[14px] text-[var(--text-500)] text-right hidden md:table-cell">{{ $file->created_at->format('d/m/Y') }}</td>
                             <td class="px-4 py-3 text-right">
                                 <div class="flex items-center justify-end gap-[10px]">
                                     @if($file->isPreviewable())
@@ -147,6 +153,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
             </div>
             @else
             <div class="flex-1 flex items-center justify-center bg-[var(--surface-card)] border border-dashed border-[var(--border-strong)] rounded-[var(--radius-card)]">
@@ -165,7 +172,7 @@
     {{-- MODAL: SUBIR ARCHIVO --}}
     <div x-ref="uploadModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50">
         <div class="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card-hover)] w-full max-w-md p-6">
-            <h3 class="text-[16px] font-semibold text-[var(--text-900)] mb-4">Subir archivo</h3>
+            <h3 class="text-[16px] font-bold text-[var(--text-900)] mb-4">Subir archivo</h3>
             <form method="POST" action="{{ route('archive.files.store', $client) }}" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="folder_id" value="{{ $folder?->id }}">
@@ -180,7 +187,7 @@
                 </div>
                 <div class="flex justify-end gap-2 mt-5">
                     <button type="button" @click="$refs.uploadModal.classList.add('hidden')"
-                            class="h-10 px-4 text-[14px] text-[var(--text-700)] border border-[var(--border-default)] rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)]">Cancelar</button>
+                            class="h-10 px-4 text-[14px] text-[var(--text-700)] bg-[var(--surface-subtle)] border border-[var(--border-default)] rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)]">Cancelar</button>
                     <button type="submit"
                             class="h-10 px-4 text-[14px] font-medium bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded-[var(--radius-control)]">Subir</button>
                 </div>
@@ -191,7 +198,7 @@
     {{-- MODAL: NUEVA CARPETA --}}
     <div x-ref="folderModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50">
         <div class="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card-hover)] w-full max-w-sm p-6">
-            <h3 class="text-[16px] font-semibold text-[var(--text-900)] mb-4">Nueva carpeta</h3>
+            <h3 class="text-[16px] font-bold text-[var(--text-900)] mb-4">Nueva carpeta</h3>
             <form method="POST" action="{{ route('archive.folders.store', $client) }}">
                 @csrf
                 <input type="hidden" name="parent_id" value="{{ $folder?->id }}">
@@ -202,7 +209,7 @@
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
                     <button type="button" @click="$refs.folderModal.classList.add('hidden')"
-                            class="h-10 px-4 text-[14px] text-[var(--text-700)] border border-[var(--border-default)] rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)]">Cancelar</button>
+                            class="h-10 px-4 text-[14px] text-[var(--text-700)] bg-[var(--surface-subtle)] border border-[var(--border-default)] rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)]">Cancelar</button>
                     <button type="submit"
                             class="h-10 px-4 text-[14px] font-medium bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded-[var(--radius-control)]">Crear</button>
                 </div>

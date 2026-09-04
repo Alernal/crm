@@ -2,457 +2,257 @@
 
 namespace Database\Seeders;
 
+use App\Http\Controllers\BudgetController;
 use App\Models\Budget;
-use App\Models\BudgetClientVariable;
-use App\Models\BudgetLine;
-use App\Models\BudgetSection;
 use App\Models\BudgetValue;
+use App\Models\ClientBudgetData;
+use App\Models\ClientBudgetYearlyData;
 use Illuminate\Database\Seeder;
+use ReflectionMethod;
 
+/**
+ * Cliente demo "JENCKY CAROLINA TAPIA DORADO", cuya actividad económica es
+ * la comercialización de equipos de tecnología. El submódulo Presupuestos
+ * quedó reducido a un solo tipo autocontenido (Flujo de Caja, sin los
+ * antiguos presupuestos separados de Ventas/Gastos ni el vínculo cruzado
+ * entre ellos) — este seeder reemplaza cualquier presupuesto de Flujo de
+ * Caja anterior de este cliente con cifras mensuales digitadas directamente,
+ * usando los nuevos drivers por defecto (`BudgetController::defaultFlujoCaja()`)
+ * en vez de heredar valores de otro presupuesto. Reutiliza el motor real de
+ * proyección (`BudgetController`) en vez de reimplementar el cálculo aquí,
+ * para no duplicar/desincronizar.
+ */
 class JenckyBudgetSeeder extends Seeder
 {
-    // client_id => user_id
-    private array $clients = [5 => 4, 10 => 5];
+    // client_id => user_id — solo el cliente demo de la cuenta de ejemplo
+    // (contador@ejemplo.com). El client_id=10 de otra cuenta ya no se toca
+    // aquí: divergió a datos reales editados a mano en la UI ("Local
+    // Sincelejo", ESF/ERI) que este seeder destructivo no debe pisar.
+    private array $clients = [5 => 4];
 
     public function run(): void
     {
         foreach ($this->clients as $clientId => $userId) {
-            $this->seedVariables($userId, $clientId);
-            $this->seedVentas($userId, $clientId);
-            $this->seedGastos($userId, $clientId);
-            $this->seedFlujoCaja($userId, $clientId);
-            $this->seedNomina($userId, $clientId);
-            $this->seedCompras($userId, $clientId);
+            Budget::where('client_id', $clientId)->where('user_id', $userId)
+                ->where('type', 'flujo_caja')->delete();
+
+            $this->addFlujoCajaFor($clientId, $userId);
         }
     }
 
-    // ── Variables macroeconómicas ────────────────────────────────────────────
-
-    private function seedVariables(int $userId, int $clientId): void
+    /**
+     * Agrega un presupuesto de Flujo de Caja de 12 meses completamente
+     * diligenciado (Ppto + Real ene-ago) para un cliente, SIN borrar ningún
+     * presupuesto existente de ese cliente — a diferencia de run(), pensado
+     * para clientes con datos reales ya cargados a mano en la UI (ej.
+     * client_id=10, que ya tiene "Local Sincelejo" + ESF/ERI).
+     */
+    public function addFlujoCajaFor(int $clientId, int $userId): void
     {
-        BudgetClientVariable::updateOrCreate(
+        $controller = new BudgetController();
+        $persist = new ReflectionMethod($controller, 'persistStructure');
+        $persist->setAccessible(true);
+        $projectFlujoCaja = new ReflectionMethod($controller, 'projectFlujoCaja');
+        $projectFlujoCaja->setAccessible(true);
+
+        $data = $this->seedData($userId, $clientId);
+        $this->seedFlujoCaja($userId, $clientId, $persist, $projectFlujoCaja, $data);
+    }
+
+    // ── Datos ────────────────────────────────────────────────────────────────
+
+    private function seedData(int $userId, int $clientId): ClientBudgetData
+    {
+        $data = ClientBudgetData::updateOrCreate(
             ['user_id' => $userId, 'client_id' => $clientId],
             [
-                'ipc'                  => 6.77,
-                'inflation'            => 5.00,
-                'smmlv_increase'       => 9.54,
-                'sales_growth'         => 12.00,
-                'sales_growth_monthly' => 0.95,
-                'new_clients_pct'      => 8.00,
-                'payroll_growth'       => 9.54,
-                'rent_growth'          => 6.77,
-                'utilities_growth'     => 8.50,
-                'purchases_growth'     => 6.50,
-                'interest_rate'        => 13.50,
-                'services_growth'      => 8.00,
+                'credit_sales_pct'      => 50.00,
+                'collection_days'       => 30,
+                'supplier_payment_days' => 45,
+                'interest_rate'         => 22.00,
+                'income_tax_rate'       => 35.00,
+                'legal_reserve_pct'     => 10.00,
+                'partner_contributions' => 30_000_000,
             ]
         );
-    }
 
-    // ── Presupuesto de Ventas ────────────────────────────────────────────────
-
-    private function seedVentas(int $userId, int $clientId): void
-    {
-        $budget = Budget::create([
-            'user_id'       => $userId,
-            'client_id'     => $clientId,
-            'name'          => 'Presupuesto de Ventas 2025–2028',
-            'type'          => 'ventas',
-            'base_year'     => 2025,
-            'period_type'   => 'annual',
-            'periods_count' => 3,
-            'status'        => 'projected',
-            'notes'         => 'Proyección basada en meta de crecimiento 12% anual. IPC referencia 6.77%. Incluye incorporación de 3 nuevos clientes anuales estimados.',
-        ]);
-
-        $sections = [
-            [
-                'name'  => 'Ingresos Operacionales',
-                'lines' => [
-                    ['name' => 'Servicios contables y de revisión',   'driver' => 'sales_growth',    'base' => 36_000_000],
-                    ['name' => 'Declaraciones tributarias',            'driver' => 'sales_growth',    'base' => 18_000_000],
-                    ['name' => 'Consultoría tributaria y fiscal',      'driver' => 'sales_growth',    'base' => 24_000_000],
-                    ['name' => 'Revisoría fiscal',                     'driver' => 'sales_growth',    'base' => 12_000_000],
-                    ['name' => 'Outsourcing nómina y RRHH',            'driver' => 'sales_growth',    'base' =>  8_400_000],
-                    ['name' => 'Auditoría de estados financieros',     'driver' => 'sales_growth',    'base' =>  6_000_000],
-                    ['name' => 'Legalización de empresas',             'driver' => 'sales_growth',    'base' =>  4_800_000],
-                    ['name' => 'Otros servicios profesionales',        'driver' => 'sales_growth',    'base' =>  3_600_000],
-                ],
-            ],
-            [
-                'name'  => 'Ingresos por Nuevos Clientes',
-                'lines' => [
-                    ['name' => 'Nuevos clientes proyectados (unid.)', 'driver' => 'sales_growth',    'base' =>  5_000_000],
-                    ['name' => 'Ingreso promedio por nuevo cliente',  'driver' => 'services_growth', 'base' =>  2_500_000],
-                ],
-            ],
-            [
-                'name'  => 'Ingresos No Operacionales',
-                'lines' => [
-                    ['name' => 'Intereses ganados',                   'driver' => 'interest_rate',   'base' =>    800_000],
-                    ['name' => 'Descuentos financieros recibidos',    'driver' => 'ipc',             'base' =>    300_000],
-                    ['name' => 'Otros ingresos no operacionales',     'driver' => 'ipc',             'base' =>    500_000],
-                ],
-            ],
+        // Inflación/SMMLV reales publicados para 2026 (mismos valores que
+        // PayrollLegalSettingSeeder), proyectados con criterio para 2027-2028.
+        $years = [
+            2026 => ['inflacion' => 4.30, 'smmlv' => 1_750_905, 'auxilio_transporte' => 249_095],
+            2027 => ['inflacion' => 3.90, 'smmlv' => 1_821_690, 'auxilio_transporte' => 258_810],
+            2028 => ['inflacion' => 3.70, 'smmlv' => 1_889_293, 'auxilio_transporte' => 268_386],
         ];
 
-        $this->insertSections($budget, $sections, [12.00, 12.00, 6.77, 6.77, 8.00, 13.50]);
+        foreach ($years as $year => $indicators) {
+            foreach ($indicators as $indicator => $value) {
+                ClientBudgetYearlyData::updateOrCreate(
+                    ['client_id' => $clientId, 'indicator' => $indicator, 'year' => $year],
+                    ['user_id' => $userId, 'value' => $value]
+                );
+            }
+        }
+
+        return $data->fresh();
     }
 
-    // ── Presupuesto de Gastos ────────────────────────────────────────────────
+    // ── Flujo de Caja: autocontenido ─────────────────────────────────────────
 
-    private function seedGastos(int $userId, int $clientId): void
+    private function seedFlujoCaja(int $userId, int $clientId, ReflectionMethod $persist, ReflectionMethod $projectFlujoCaja, ClientBudgetData $data): void
     {
         $budget = Budget::create([
-            'user_id'       => $userId,
-            'client_id'     => $clientId,
-            'name'          => 'Presupuesto de Gastos 2025–2028',
-            'type'          => 'gastos',
-            'base_year'     => 2025,
-            'period_type'   => 'annual',
-            'periods_count' => 3,
-            'status'        => 'projected',
-            'notes'         => 'Gastos proyectados con incremento SMMLV 9.54% para nómina y prestaciones. Arrendamiento proyectado con IPC 6.77% (límite legal). Servicios públicos con incremento estimado 8.5%.',
+            'user_id'                          => $userId,
+            'client_id'                        => $clientId,
+            'name'                              => 'Flujo de Caja Proyectado 2026',
+            'type'                              => 'flujo_caja',
+            'base_year'                         => 2026,
+            'period_type'                       => 'monthly',
+            'periods_count'                     => 12,
+            'status'                            => 'draft',
         ]);
 
-        $sections = [
-            [
-                'name'  => 'Gastos de Personal',
-                'lines' => [
-                    ['name' => 'Salarios básicos',                   'driver' => 'smmlv',           'base' => 54_000_000],
-                    ['name' => 'Horas extras y recargos',            'driver' => 'smmlv',           'base' =>  2_160_000],
-                    ['name' => 'Bonificaciones y comisiones',        'driver' => 'payroll_growth',  'base' =>  3_600_000],
-                    ['name' => 'Auxilio de transporte',              'driver' => 'smmlv',           'base' =>  3_060_000],
-                    ['name' => 'Salud empleador (8.5%)',             'driver' => 'smmlv',           'base' =>  4_590_000],
-                    ['name' => 'Pensión empleador (12%)',            'driver' => 'smmlv',           'base' =>  6_480_000],
-                    ['name' => 'ARL',                                'driver' => 'smmlv',           'base' =>    648_000],
-                    ['name' => 'Caja de compensación (4%)',          'driver' => 'smmlv',           'base' =>  2_160_000],
-                    ['name' => 'SENA (2%)',                          'driver' => 'smmlv',           'base' =>  1_080_000],
-                    ['name' => 'ICBF (3%)',                          'driver' => 'smmlv',           'base' =>  1_620_000],
-                    ['name' => 'Cesantías (8.33%)',                  'driver' => 'smmlv',           'base' =>  4_498_200],
-                    ['name' => 'Intereses sobre cesantías (1%)',     'driver' => 'smmlv',           'base' =>    449_820],
-                    ['name' => 'Prima de servicios (8.33%)',         'driver' => 'smmlv',           'base' =>  4_498_200],
-                    ['name' => 'Vacaciones (4.17%)',                 'driver' => 'smmlv',           'base' =>  2_251_800],
-                ],
-            ],
-            [
-                'name'  => 'Gastos Generales de Operación',
-                'lines' => [
-                    ['name' => 'Arrendamiento oficina',              'driver' => 'rent_growth',     'base' =>  4_800_000],
-                    ['name' => 'Servicio de energía eléctrica',      'driver' => 'utilities_growth','base' =>  1_800_000],
-                    ['name' => 'Agua y acueducto',                   'driver' => 'utilities_growth','base' =>    720_000],
-                    ['name' => 'Internet y telefonía',               'driver' => 'utilities_growth','base' =>  1_800_000],
-                    ['name' => 'Gas domiciliario',                   'driver' => 'utilities_growth','base' =>    480_000],
-                    ['name' => 'Papelería y útiles de oficina',      'driver' => 'ipc',             'base' =>    900_000],
-                    ['name' => 'Cafetería y aseo',                   'driver' => 'ipc',             'base' =>    720_000],
-                    ['name' => 'Aseo y limpieza',                    'driver' => 'ipc',             'base' =>    480_000],
-                    ['name' => 'Transporte y viáticos',              'driver' => 'ipc',             'base' =>  2_400_000],
-                    ['name' => 'Publicidad y mercadeo',              'driver' => 'sales_growth',    'base' =>  1_800_000],
-                ],
-            ],
-            [
-                'name'  => 'Gastos de Tecnología',
-                'lines' => [
-                    ['name' => 'Software contable y licencias',      'driver' => 'ipc',             'base' =>  3_600_000],
-                    ['name' => 'Mantenimiento equipos de cómputo',   'driver' => 'ipc',             'base' =>    900_000],
-                    ['name' => 'Hosting y servicios en la nube',     'driver' => 'ipc',             'base' =>    720_000],
-                    ['name' => 'Otros gastos de tecnología',         'driver' => 'ipc',             'base' =>    360_000],
-                ],
-            ],
-            [
-                'name'  => 'Gastos Financieros',
-                'lines' => [
-                    ['name' => 'Comisiones bancarias',               'driver' => 'ipc',             'base' =>    720_000],
-                    ['name' => 'Intereses sobre créditos',           'driver' => 'interest_rate',   'base' =>  1_800_000],
-                    ['name' => 'GMF – 4x1000',                       'driver' => 'sales_growth',    'base' =>    900_000],
-                ],
-            ],
-            [
-                'name'  => 'Otros Gastos',
-                'lines' => [
-                    ['name' => 'Seguros',                            'driver' => 'ipc',             'base' =>  1_800_000],
-                    ['name' => 'Honorarios profesionales externos',  'driver' => 'services_growth', 'base' =>  3_600_000],
-                    ['name' => 'Capacitación y actualización',       'driver' => 'ipc',             'base' =>  2_400_000],
-                    ['name' => 'Gastos legales y notariales',        'driver' => 'ipc',             'base' =>    900_000],
-                    ['name' => 'Gastos diversos',                    'driver' => 'ipc',             'base' =>  1_800_000],
-                ],
-            ],
+        $controller = new BudgetController();
+        $sections = $controller->defaultSectionsFor('flujo_caja');
+
+        // Cifras mensuales de referencia (editables) para TODOS los rubros
+        // del catálogo (comercializadora de equipos de tecnología) — a
+        // diferencia de la versión anterior de este seeder, que dejaba en 0
+        // cualquier rubro sin un valor "interesante" a propósito, aquí se
+        // digita un valor base razonable en cada renglón para poder ver el
+        // dashboard/gráfica con las 32 filas del catálogo pobladas.
+        // "Recaudo de cartera" necesita un valor de período 0 distinto de 0
+        // solo para activar su auto-cálculo (ver projectRecaudoCartera) —
+        // el valor real que queda en pantalla lo deriva de "Ventas" +
+        // Datos.credit_sales_pct/collection_days.
+        $baseValues = [
+            'Saldo inicial'                                        => 5_000_000,
+
+            // Entradas
+            'Ventas'                                                => 25_000_000,
+            'Recaudo de cartera'                                    => 25_000_000,
+            'Aportes de socios'                                     => 1_500_000,
+            'Préstamos bancarios solicitados'                       => 1_000_000,
+            'Préstamos solicitados a socios o accionistas'          => 500_000,
+            'Recaudo de préstamos realizados a empleados'           => 200_000,
+            'Ventas de propiedad, planta y equipo'                  => 150_000,
+            'Venta de activos intangibles'                          => 80_000,
+            'Intereses financieros recibidos'                       => 100_000,
+            'Dividendos y participaciones recibidos'                => 80_000,
+            'Devolución de impuestos'                               => 200_000,
+            'Otras entradas'                                        => 250_000,
+
+            // Salidas
+            'Pago a proveedores'                                    => 30_000_000,
+            'Pago de servicios públicos'                            => 1_200_000,
+            'Pago de nómina'                                        => 10_000_000,
+            'Pago por arrendamiento'                                => 3_000_000,
+            'Pagos por publicidad'                                  => 800_000,
+            'Pagos por asesorías'                                   => 600_000,
+            'Pagos por reparaciones y mantenimiento'                => 400_000,
+            'Pagos a otros acreedores'                              => 300_000,
+            'Pagos por seguros'                                     => 700_000,
+            'Pago de impuesto de renta'                             => 1_000_000,
+            'Pago de IVA'                                           => 2_500_000,
+            'Pago de impuesto al consumo'                           => 150_000,
+            'Pago de retención en la fuente'                        => 500_000,
+            'Pago de cuotas por préstamos bancarios'                => 1_200_000,
+            'Pago de cuotas de préstamos solicitados a socios o accionistas' => 300_000,
+            'Préstamos otorgados a empleados'                       => 200_000,
+            'Pago de dividendos o participaciones a socios o accionistas'   => 400_000,
+            'Compra de propiedad, planta y equipo'                  => 800_000,
+            'Compra de intangibles'                                 => 200_000,
+            'Intereses financieros pagados'                         => 450_000,
+            'Otros pagos'                                           => 250_000,
         ];
 
-        $this->insertSections($budget, $sections, [9.54, 6.77, 8.50, 12.00, 13.50, 8.00]);
+        // "Ventas" crece con una tasa mensual moderada (0.8%/mes ≈ 10% anual)
+        // — el resto de rubros con driver custom_pct/inflation/smmlv no
+        // necesita `custom_rate` propio salvo Ventas.
+        $customRates = ['Ventas' => 0.8];
+
+        foreach ($sections as &$section) {
+            foreach ($section['lines'] as &$line) {
+                $line['projection_driver'] = $line['driver'];
+                $line['custom_rate'] = $customRates[$line['name']] ?? null;
+                $line['sign_negative'] = false;
+                $line['base_value'] = $baseValues[$line['name']] ?? 0;
+            }
+        }
+        unset($section, $line);
+
+        $persist->invoke($controller, $budget, $sections);
+
+        $budget->load(['client', 'sections.lines.values']);
+        $projectFlujoCaja->invoke($controller, $budget, $data);
+
+        $this->seedReal($controller, $budget);
     }
 
-    // ── Flujo de Caja ────────────────────────────────────────────────────────
-
-    private function seedFlujoCaja(int $userId, int $clientId): void
+    /**
+     * Cifras "Real" para los meses ya transcurridos del año en curso (hoy:
+     * ago-2026). `period_index=0` es la propia columna de enero (no una fila
+     * de base oculta, a diferencia de ESF/ERI) así que los 8 meses ya
+     * vividos son period_index 0..7 (ene-ago) — con una variación
+     * pseudo-aleatoria pero determinística (±12%) respecto al Ppto por
+     * línea/período, para que "% Cumplimiento"/"Mayores variaciones" del
+     * dashboard muestren algo real en vez de 0% en todas partes. Los meses
+     * futuros (sep-2026 en adelante, period_index 8+) se quedan sin Real,
+     * como corresponde a un presupuesto que todavía no se ha vivido.
+     */
+    private function seedReal(BudgetController $controller, Budget $budget): void
     {
-        $budget = Budget::create([
-            'user_id'       => $userId,
-            'client_id'     => $clientId,
-            'name'          => 'Flujo de Caja Proyectado 2025–2028',
-            'type'          => 'flujo_caja',
-            'base_year'     => 2025,
-            'period_type'   => 'annual',
-            'periods_count' => 3,
-            'status'        => 'projected',
-            'notes'         => 'Flujo de caja elaborado con base en política de cartera 45 días. Se proyecta reducción de cartera vencida del 15% anual. Incluye cuota crédito vehículo $2.4M/mes.',
-        ]);
+        $recompute = new ReflectionMethod($controller, 'recomputeFlujoCajaBalances');
+        $recompute->setAccessible(true);
 
-        $sections = [
+        $budget->load(['sections.lines.values']);
+        $sections = $budget->sections;
+        $saldoInicialLine = $sections->first()->lines->first();
+        $saldoFinalLine   = $sections->last()->lines->first();
+        $lastRealPeriod = 7; // period_index 0..7 = ene-ago 2026
+
+        BudgetValue::updateOrCreate(
+            ['line_id' => $saldoInicialLine->id, 'period_index' => 0, 'value_type' => 'actual'],
             [
-                'name'  => 'Saldo Inicial',
-                'lines' => [
-                    ['name' => 'Saldo inicial de caja y bancos',      'driver' => 'fixed',           'base' =>  8_000_000],
-                ],
-            ],
-            [
-                'name'  => 'Ingresos de Efectivo',
-                'lines' => [
-                    ['name' => 'Cobros a clientes (cartera)',          'driver' => 'sales_growth',    'base' => 105_000_000],
-                    ['name' => 'Ventas de contado',                    'driver' => 'sales_growth',    'base' =>   8_500_000],
-                    ['name' => 'Préstamos bancarios recibidos',        'driver' => 'fixed',           'base' =>  10_000_000],
-                    ['name' => 'Aportes de socios / capital',          'driver' => 'fixed',           'base' =>   5_000_000],
-                    ['name' => 'Rendimientos financieros',             'driver' => 'interest_rate',   'base' =>     800_000],
-                    ['name' => 'Otros ingresos de efectivo',           'driver' => 'ipc',             'base' =>     500_000],
-                ],
-            ],
-            [
-                'name'  => 'Egresos Operativos',
-                'lines' => [
-                    ['name' => 'Pago a proveedores',                   'driver' => 'purchases_growth','base' =>  15_000_000],
-                    ['name' => 'Pago de nómina',                       'driver' => 'smmlv',           'base' =>  54_000_000],
-                    ['name' => 'Pago de prestaciones sociales',        'driver' => 'smmlv',           'base' =>  11_700_000],
-                    ['name' => 'Pago parafiscales y seguridad social', 'driver' => 'smmlv',           'base' =>  16_578_000],
-                    ['name' => 'Pago de arrendamientos',               'driver' => 'rent_growth',     'base' =>   4_800_000],
-                    ['name' => 'Pago servicios públicos',              'driver' => 'utilities_growth','base' =>   4_800_000],
-                    ['name' => 'Papelería y gastos menores',           'driver' => 'ipc',             'base' =>   1_500_000],
-                ],
-            ],
-            [
-                'name'  => 'Egresos Tributarios',
-                'lines' => [
-                    ['name' => 'Pago IVA',                             'driver' => 'sales_growth',    'base' =>   5_000_000],
-                    ['name' => 'Pago retefuente',                      'driver' => 'sales_growth',    'base' =>   3_500_000],
-                    ['name' => 'Pago renta / CREE',                    'driver' => 'sales_growth',    'base' =>   4_200_000],
-                    ['name' => 'Pago ICA',                             'driver' => 'sales_growth',    'base' =>     840_000],
-                    ['name' => 'Otros impuestos y contribuciones',     'driver' => 'ipc',             'base' =>     500_000],
-                ],
-            ],
-            [
-                'name'  => 'Egresos Financieros',
-                'lines' => [
-                    ['name' => 'Pago cuotas de crédito (capital)',     'driver' => 'fixed',           'base' =>   2_400_000],
-                    ['name' => 'Pago intereses de créditos',           'driver' => 'interest_rate',   'base' =>   1_800_000],
-                    ['name' => 'GMF y comisiones bancarias',           'driver' => 'sales_growth',    'base' =>     900_000],
-                ],
-            ],
-            [
-                'name'  => 'Saldo Final',
-                'lines' => [
-                    ['name' => 'Saldo final de caja y bancos',         'driver' => 'fixed',           'base' =>   5_280_000],
-                ],
-            ],
-        ];
+                'budget_id'          => $budget->id,
+                'period_label'       => $budget->buildPeriodLabel(0),
+                'value'              => $saldoInicialLine->getValueForPeriod(0, 'budgeted'),
+                'is_manual_override' => true,
+            ]
+        );
 
-        $this->insertSections($budget, $sections, [12.00, 9.54, 6.77, 8.50, 13.50, 6.50]);
-    }
+        foreach ($sections->slice(1, $sections->count() - 2) as $section) {
+            foreach ($section->lines as $line) {
+                for ($i = 0; $i <= $lastRealPeriod; $i++) {
+                    $ppto = $line->getValueForPeriod($i, 'budgeted');
+                    if ($ppto == 0.0) continue;
 
-    // ── Presupuesto de Nómina ────────────────────────────────────────────────
+                    $seed = crc32($line->name.'|'.$i) % 25; // 0..24 → -12%..+12%
+                    $variance = ($seed - 12) / 100;
+                    $real = round($ppto * (1 + $variance), 2);
 
-    private function seedNomina(int $userId, int $clientId): void
-    {
-        $budget = Budget::create([
-            'user_id'       => $userId,
-            'client_id'     => $clientId,
-            'name'          => 'Presupuesto de Nómina 2025–2028',
-            'type'          => 'nomina',
-            'base_year'     => 2025,
-            'period_type'   => 'annual',
-            'periods_count' => 3,
-            'status'        => 'projected',
-            'notes'         => 'SMMLV 2025: $1,423,500. Nómina 3 empleados + propietaria. Incremento proyectado 9.54% anual (equivalente a ajuste SMMLV 2025). Costo total empleador incluye factor prestacional 52%.',
-        ]);
-
-        $sections = [
-            [
-                'name'  => 'Salarios y Compensaciones',
-                'lines' => [
-                    ['name' => 'Gerente / Directora',                 'driver' => 'smmlv',           'base' => 54_000_000],
-                    ['name' => 'Contador principal',                  'driver' => 'smmlv',           'base' => 36_000_000],
-                    ['name' => 'Auxiliar contable 1',                 'driver' => 'smmlv',           'base' => 21_600_000],
-                    ['name' => 'Asistente administrativo',            'driver' => 'smmlv',           'base' => 18_000_000],
-                    ['name' => 'Otros cargos',                        'driver' => 'smmlv',           'base' =>          0],
-                    ['name' => 'Horas extras y recargos',             'driver' => 'smmlv',           'base' =>  2_160_000],
-                    ['name' => 'Bonificaciones',                      'driver' => 'payroll_growth',  'base' =>  3_600_000],
-                    ['name' => 'Auxilio de transporte',               'driver' => 'smmlv',           'base' =>  3_060_000],
-                ],
-            ],
-            [
-                'name'  => 'Aportes Parafiscales Empleador',
-                'lines' => [
-                    ['name' => 'Salud empleador (8.5%)',              'driver' => 'smmlv',           'base' =>  9_180_000],
-                    ['name' => 'Pensión empleador (12%)',             'driver' => 'smmlv',           'base' => 12_960_000],
-                    ['name' => 'ARL',                                 'driver' => 'smmlv',           'base' =>  1_296_000],
-                    ['name' => 'Caja de compensación familiar (4%)', 'driver' => 'smmlv',           'base' =>  4_320_000],
-                    ['name' => 'SENA (2%)',                           'driver' => 'smmlv',           'base' =>  2_160_000],
-                    ['name' => 'ICBF (3%)',                           'driver' => 'smmlv',           'base' =>  3_240_000],
-                ],
-            ],
-            [
-                'name'  => 'Prestaciones Sociales',
-                'lines' => [
-                    ['name' => 'Cesantías (8.33%)',                   'driver' => 'smmlv',           'base' =>  8_996_400],
-                    ['name' => 'Intereses sobre cesantías (1%)',      'driver' => 'smmlv',           'base' =>    899_640],
-                    ['name' => 'Prima de servicios (8.33%)',          'driver' => 'smmlv',           'base' =>  8_996_400],
-                    ['name' => 'Vacaciones (4.17%)',                  'driver' => 'smmlv',           'base' =>  4_503_600],
-                ],
-            ],
-            [
-                'name'  => 'Deducciones Empleado',
-                'lines' => [
-                    ['name' => 'Salud empleado (4%)',                 'driver' => 'smmlv',           'base' =>  4_320_000],
-                    ['name' => 'Pensión empleado (4%)',               'driver' => 'smmlv',           'base' =>  4_320_000],
-                    ['name' => 'Retención en la fuente salarios',     'driver' => 'smmlv',           'base' =>  1_800_000],
-                    ['name' => 'Libranzas y descuentos varios',       'driver' => 'fixed',           'base' =>          0],
-                ],
-            ],
-            [
-                'name'  => 'Costo Total de Nómina',
-                'lines' => [
-                    ['name' => 'Costo total empleador (factor ×1.52)','driver' => 'smmlv',           'base' => 196_972_040],
-                    ['name' => 'Neto pagado a empleados',             'driver' => 'smmlv',           'base' => 124_320_000],
-                ],
-            ],
-        ];
-
-        $this->insertSections($budget, $sections, [9.54, 9.54, 9.54, 9.54, 9.54]);
-    }
-
-    // ── Presupuesto de Compras ───────────────────────────────────────────────
-
-    private function seedCompras(int $userId, int $clientId): void
-    {
-        $budget = Budget::create([
-            'user_id'       => $userId,
-            'client_id'     => $clientId,
-            'name'          => 'Presupuesto de Compras 2025–2028',
-            'type'          => 'compras',
-            'base_year'     => 2025,
-            'period_type'   => 'annual',
-            'periods_count' => 3,
-            'status'        => 'projected',
-            'notes'         => 'Compras proyectadas con incremento del 6.5% anual (inflación de insumos + proveedor). Se mantiene política de rotación de inventario de 30 días.',
-        ]);
-
-        $sections = [
-            [
-                'name'  => 'Compras de Mercancías / Insumos',
-                'lines' => [
-                    ['name' => 'Compras brutas de mercancías',        'driver' => 'purchases_growth','base' => 18_000_000],
-                    ['name' => 'Compras de materias primas',          'driver' => 'purchases_growth','base' =>  6_000_000],
-                    ['name' => 'Compras de materiales de empaque',    'driver' => 'purchases_growth','base' =>  1_200_000],
-                    ['name' => 'Devoluciones en compras',             'driver' => 'purchases_growth','base' =>    900_000],
-                    ['name' => 'Descuentos comerciales recibidos',    'driver' => 'ipc',             'base' =>    600_000],
-                ],
-            ],
-            [
-                'name'  => 'Costos de Importación',
-                'lines' => [
-                    ['name' => 'Fletes y transporte',                 'driver' => 'ipc',             'base' =>  1_200_000],
-                    ['name' => 'Seguros sobre mercancías',            'driver' => 'ipc',             'base' =>    360_000],
-                    ['name' => 'Derechos de aduana e IVA importado', 'driver' => 'ipc',             'base' =>    480_000],
-                    ['name' => 'Gastos de agenciamiento aduanero',   'driver' => 'ipc',             'base' =>    240_000],
-                ],
-            ],
-            [
-                'name'  => 'Control de Inventarios',
-                'lines' => [
-                    ['name' => 'Inventario inicial del período',      'driver' => 'purchases_growth','base' =>  3_500_000],
-                    ['name' => 'Inventario final del período',        'driver' => 'purchases_growth','base' =>  3_500_000],
-                    ['name' => 'Costo de ventas (calculado)',         'driver' => 'purchases_growth','base' => 21_300_000],
-                ],
-            ],
-            [
-                'name'  => 'Proveedores Principales',
-                'lines' => [
-                    ['name' => 'Proveedor principal – Papelería Ltda.','driver' => 'purchases_growth','base' =>  7_200_000],
-                    ['name' => 'Proveedor 2 – Suministros Tech S.A.', 'driver' => 'purchases_growth','base' =>  4_800_000],
-                    ['name' => 'Proveedor 3 – Servicios Logísticos',  'driver' => 'purchases_growth','base' =>  3_600_000],
-                    ['name' => 'Otros proveedores menores',            'driver' => 'purchases_growth','base' =>  2_400_000],
-                ],
-            ],
-        ];
-
-        $this->insertSections($budget, $sections, [6.50, 6.77, 6.50, 6.50]);
-    }
-
-    // ── Helper genérico ──────────────────────────────────────────────────────
-
-    private function insertSections(Budget $budget, array $sections, array $ratesHint): void
-    {
-        $vars = BudgetClientVariable::where('user_id', $budget->user_id)
-                    ->where('client_id', $budget->client_id)
-                    ->first();
-
-        foreach ($sections as $sIdx => $sData) {
-            $section = BudgetSection::create([
-                'budget_id'  => $budget->id,
-                'name'       => $sData['name'],
-                'sort_order' => $sIdx,
-            ]);
-
-            foreach ($sData['lines'] as $lIdx => $lData) {
-                $line = BudgetLine::create([
-                    'budget_id'         => $budget->id,
-                    'section_id'        => $section->id,
-                    'name'              => $lData['name'],
-                    'sort_order'        => $lIdx,
-                    'projection_driver' => $lData['driver'],
-                    'custom_rate'       => null,
-                    'is_subtotal'       => false,
-                    'sign_negative'     => false,
-                ]);
-
-                $base = (float) $lData['base'];
-
-                for ($p = 0; $p <= $budget->periods_count; $p++) {
-                    $value = $this->project($base, $lData['driver'], $p, $vars);
-
-                    BudgetValue::create([
-                        'budget_id'          => $budget->id,
-                        'line_id'            => $line->id,
-                        'period_label'       => $budget->buildPeriodLabel($p),
-                        'period_index'       => $p,
-                        'value'              => $value,
-                        'is_manual_override' => ($p === 0),
-                    ]);
+                    BudgetValue::updateOrCreate(
+                        ['line_id' => $line->id, 'period_index' => $i, 'value_type' => 'actual'],
+                        [
+                            'budget_id'          => $budget->id,
+                            'period_label'       => $budget->buildPeriodLabel($i),
+                            'value'              => $real,
+                            'is_manual_override' => true,
+                        ]
+                    );
                 }
             }
         }
-    }
 
-    private function project(float $base, string $driver, int $n, ?BudgetClientVariable $vars): float
-    {
-        if ($n === 0 || $driver === 'manual' || $driver === 'fixed') {
-            return $base;
-        }
+        $budget->load(['sections.lines.values']);
+        $recompute->invoke($controller, $budget, 'actual');
 
-        $rate = match ($driver) {
-            'ipc'                  => $vars?->ipc            ?? 6.77,
-            'inflation'            => $vars?->inflation       ?? 5.00,
-            'smmlv'                => $vars?->smmlv_increase  ?? 9.54,
-            'sales_growth'         => $vars?->sales_growth    ?? 12.00,
-            'sales_growth_monthly' => $vars?->sales_growth_monthly ?? 0.95,
-            'new_clients_pct'      => $vars?->sales_growth    ?? 12.00,
-            'payroll_growth'       => $vars?->payroll_growth  ?? 9.54,
-            'rent_growth'          => $vars?->rent_growth     ?? 6.77,
-            'utilities_growth'     => $vars?->utilities_growth ?? 8.50,
-            'purchases_growth'     => $vars?->purchases_growth ?? 6.50,
-            'interest_rate'        => $vars?->interest_rate   ?? 13.50,
-            'services_growth'      => $vars?->services_growth ?? 8.00,
-            default                => 0.0,
-        };
-
-        return round($base * pow(1 + $rate / 100, $n), 2);
+        // recomputeFlujoCajaBalances() siempre recorre 1..periods_count —
+        // sin cifras Real digitadas, los períodos futuros arrastrarían un
+        // saldo "Real" plano (net flow = 0) que nunca existió. Se borran los
+        // saldos Real de los períodos aún no transcurridos.
+        BudgetValue::whereIn('line_id', [$saldoInicialLine->id, $saldoFinalLine->id])
+            ->where('value_type', 'actual')
+            ->where('period_index', '>', $lastRealPeriod)
+            ->delete();
     }
 }

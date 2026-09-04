@@ -1,7 +1,7 @@
 <x-guest-layout>
 
     <div class="mb-8">
-        <h2 class="text-[22px] font-semibold text-[var(--text-900)]">Recuperar contraseña</h2>
+        <h1 class="text-[22px] font-bold text-[var(--text-900)]">Recuperar contraseña</h1>
         <p class="mt-2 text-[var(--text-500)] text-[14px]">
             Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.
         </p>

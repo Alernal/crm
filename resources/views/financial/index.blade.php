@@ -1,13 +1,11 @@
 <x-app-layout>
-<x-slot name="title">Módulo Financiero</x-slot>
-
-@php
-    $statusLabels = \App\Models\Budget::STATUS_LABELS;
-@endphp
+<x-slot name="title">Presupuestos</x-slot>
 
 {{-- Flash --}}
 @if(session('success'))
-<div class="mb-5 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
+<div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)" x-show="show"
+     x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+     class="mb-5 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
     <x-lucide-check-circle class="w-4 h-4 flex-shrink-0" />
     {{ session('success') }}
 </div>
@@ -35,9 +33,9 @@
     @foreach($clients as $client)
     @php
         $clientBudgets  = $budgetsByClient->get($client->id, collect());
-        $clientVars     = $variablesByClient->get($client->id);
+        $clientData     = $dataByClient->get($client->id);
         $hasBudgets     = $clientBudgets->isNotEmpty();
-        $hasVars        = $clientVars !== null;
+        $hasData        = $clientData !== null;
         $budgetCount    = $clientBudgets->count();
 
         $initials = collect(explode(' ', $client->name))
@@ -52,7 +50,7 @@
                 {{ $initials }}
             </div>
             <div class="flex-1 min-w-0">
-                <h3 class="text-[14px] font-semibold text-[var(--text-900)] leading-tight truncate">{{ $client->name }}</h3>
+                <h3 class="text-[14px] font-bold text-[var(--text-900)] leading-tight truncate">{{ $client->name }}</h3>
                 <p class="text-[12px] text-[var(--text-400)] mt-0.5">
                     {{ $client->document_type }} {{ $client->document_number }}
                     @if($client->dv) -{{ $client->dv }}@endif
@@ -74,14 +72,14 @@
         </div>
 
         {{-- Botones de acción --}}
-        <div class="mt-auto border-t border-[var(--border-default)] px-5 py-3 flex items-center justify-end gap-2">
+        <div class="mt-auto px-5 py-3 flex items-center justify-end gap-2">
 
-            {{-- Variables --}}
-            <a href="{{ route('financial.variables', $client) }}"
-               title="{{ $hasVars ? 'Variables' : 'Configurar variables' }}"
+            {{-- Datos --}}
+            <a href="{{ route('financial.data', $client) }}"
+               title="{{ $hasData ? 'Datos' : 'Configurar datos' }}"
                class="w-9 h-9 rounded-[var(--radius-control)] flex items-center justify-center
-                      {{ $hasVars ? 'bg-[var(--surface-muted)] hover:bg-[var(--border-default)] text-[var(--text-500)]' : 'bg-[var(--color-warning-bg)] hover:opacity-90 text-[var(--color-warning)] border border-[#FCD34D]' }}">
-                <x-lucide-settings class="w-4 h-4" />
+                      {{ $hasData ? 'bg-[var(--surface-muted)] hover:bg-[var(--border-default)] text-[var(--text-500)]' : 'bg-[var(--color-warning-bg)] hover:opacity-90 text-[var(--color-warning)] border border-[#FCD34D]' }}">
+                <x-lucide-database class="w-4 h-4" />
             </a>
 
             @if($hasBudgets)

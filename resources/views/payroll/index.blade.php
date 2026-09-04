@@ -10,21 +10,23 @@
 {{-- Header --}}
 <div class="flex items-start justify-end mb-6">
     <button @click="abrir()"
-            class="inline-flex items-center gap-[6px] h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">
+            class="inline-flex items-center gap-[6px] h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[15px] font-medium">
         <x-lucide-plus class="w-4 h-4" />
         Generar nómina
     </button>
 </div>
 
 @if(session('success'))
-<div class="mb-5 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
+<div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)" x-show="show"
+     x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+     class="mb-5 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[15px] px-4 py-3 rounded-[var(--radius-control)]">
     <x-lucide-check-circle class="w-4 h-4 flex-shrink-0" />
     {{ session('success') }}
 </div>
 @endif
 
 @if($errors->any())
-<div class="mb-5 flex items-center gap-2 bg-[var(--color-danger-bg)] border border-[var(--color-danger)]/20 text-[var(--color-danger-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
+<div class="mb-5 flex items-center gap-2 bg-[var(--color-danger-bg)] border border-[var(--color-danger)]/20 text-[var(--color-danger-text)] text-[15px] px-4 py-3 rounded-[var(--radius-control)]">
     <x-lucide-alert-triangle class="w-4 h-4 flex-shrink-0" />
     {{ $errors->first() }}
 </div>
@@ -32,23 +34,23 @@
 
 {{-- Filtros --}}
 <form method="GET" action="{{ route('payroll-periods.index', [], false) }}" class="flex flex-col sm:flex-row gap-3 mb-5">
-    <select name="client_id" class="{{ $fieldClass }} sm:max-w-[220px]">
+    <select name="client_id" class="h-10 px-3.5 border border-[var(--border-default)] rounded-[var(--radius-control)] text-[15px] bg-[var(--surface-card)] text-[var(--text-700)] focus:ring-1 focus:ring-[var(--color-primary-light)] focus:border-[var(--border-default)] outline-none sm:max-w-[220px]">
         <option value="">Todos los clientes</option>
         @foreach($clients as $c)
         <option value="{{ $c->id }}" {{ (string) request('client_id') === (string) $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
         @endforeach
     </select>
-    <select name="status" class="{{ $fieldClass }} sm:max-w-[180px]">
+    <select name="status" class="h-10 px-3.5 border border-[var(--border-default)] rounded-[var(--radius-control)] text-[15px] bg-[var(--surface-card)] text-[var(--text-700)] focus:ring-1 focus:ring-[var(--color-primary-light)] focus:border-[var(--border-default)] outline-none sm:max-w-[180px]">
         <option value="">Todos los estados</option>
         @foreach(\App\Models\PayrollPeriod::STATUSES as $val => $lbl)
         <option value="{{ $val }}" {{ request('status') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
         @endforeach
     </select>
-    <button type="submit" class="h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">
+    <button type="submit" class="h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[15px] font-medium">
         Buscar
     </button>
     @if(request()->hasAny(['client_id','status']))
-    <a href="{{ route('payroll-periods.index', [], false) }}" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+    <a href="{{ route('payroll-periods.index', [], false) }}" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[15px] font-medium hover:bg-[var(--surface-muted)]">
         Limpiar
     </a>
     @endif
@@ -61,40 +63,46 @@
         <div class="w-16 h-16 rounded-[var(--radius-card)] bg-[var(--surface-muted)] flex items-center justify-center mb-4">
             <x-lucide-banknote class="w-8 h-8 text-[var(--text-400)]" />
         </div>
-        <p class="text-[14px] font-semibold text-[var(--text-700)]">Aún no has generado períodos de nómina</p>
-        <p class="text-[12px] text-[var(--text-400)] mt-1">Genera el primer período para uno de tus clientes</p>
-        <button @click="abrir()" class="mt-4 inline-flex items-center gap-[6px] h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">
+        <p class="text-[15px] font-semibold text-[var(--text-700)]">Aún no has generado períodos de nómina</p>
+        <p class="text-[13px] text-[var(--text-400)] mt-1">Genera el primer período para uno de tus clientes</p>
+        <button @click="abrir()" class="mt-4 inline-flex items-center gap-[6px] h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[15px] font-medium">
             <x-lucide-plus class="w-4 h-4" />
             Generar nómina
         </button>
     </div>
     @else
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto p-3">
+    <div class="overflow-y-auto max-h-[65vh]">
         <table class="w-full">
             <thead>
-                <tr class="border-b border-[var(--border-default)]">
-                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left">Período</th>
-                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left">Cliente</th>
-                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left hidden md:table-cell">Rango</th>
-                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-right hidden sm:table-cell">Neto total</th>
-                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-center">Estado</th>
-                    <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-right">Acciones</th>
+                <tr>
+                    @php
+                        $thClass = 'sticky top-0 z-[1] bg-[var(--surface-card)] border-b border-[var(--border-default)] text-[13px] font-bold text-[var(--text-900)] px-6 py-3.5';
+                    @endphp
+                    <th class="{{ $thClass }} text-left">Período</th>
+                    <th class="{{ $thClass }} text-left hidden lg:table-cell">Periodicidad</th>
+                    <th class="{{ $thClass }} text-left">Cliente</th>
+                    <th class="{{ $thClass }} text-left hidden md:table-cell">Rango</th>
+                    <th class="{{ $thClass }} text-right hidden sm:table-cell">Neto total</th>
+                    <th class="{{ $thClass }} text-center">Estado</th>
+                    <th class="{{ $thClass }} text-right">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($periods as $period)
-                <tr class="border-b border-[var(--surface-muted)] hover:bg-[var(--surface-subtle)]">
+                <tr class="border-b border-[var(--surface-muted)] border-l-[3px] border-l-transparent hover:border-l-[var(--color-primary)] hover:bg-[var(--surface-subtle)]">
                     <td class="px-6 py-[14px]">
-                        <a href="{{ route('payroll-periods.show', $period, false) }}" class="font-semibold text-[14px] text-[var(--text-900)] hover:text-[var(--color-primary)]">
+                        <a href="{{ route('payroll-periods.show', $period, false) }}" class="text-[14px] text-[var(--text-500)] hover:text-[var(--color-primary)]">
                             {{ $period->number }}
                         </a>
-                        <p class="text-[12px] text-[var(--text-400)] mt-0.5">{{ \App\Models\PayrollPeriod::PERIOD_TYPES[$period->period_type] }}</p>
+                        <p class="text-[13px] text-[var(--text-400)] mt-0.5 lg:hidden">{{ \App\Models\PayrollPeriod::PERIOD_TYPES[$period->period_type] }}</p>
                     </td>
-                    <td class="px-6 py-[14px] text-[14px] text-[var(--text-700)]">{{ $period->client->name }}</td>
-                    <td class="px-6 py-[14px] hidden md:table-cell text-[14px] text-[var(--text-700)]">
+                    <td class="px-6 py-[14px] hidden lg:table-cell text-[14px] text-[var(--text-500)]">{{ \App\Models\PayrollPeriod::PERIOD_TYPES[$period->period_type] }}</td>
+                    <td class="px-6 py-[14px] text-[14px] text-[var(--text-500)]">{{ $period->client->name }}</td>
+                    <td class="px-6 py-[14px] hidden md:table-cell text-[14px] text-[var(--text-500)]">
                         {{ $period->start_date->format('d/m/Y') }} – {{ $period->end_date->format('d/m/Y') }}
                     </td>
-                    <td class="px-6 py-[14px] hidden sm:table-cell text-right text-[14px] font-semibold text-[var(--text-900)]">
+                    <td class="px-6 py-[14px] hidden sm:table-cell text-right text-[14px] text-[var(--text-500)] tabular-nums">
                         $ {{ number_format($period->total_net_pay, 0, ',', '.') }}
                     </td>
                     <td class="px-6 py-[14px] text-center">
@@ -107,7 +115,7 @@
                             <a href="{{ route('payroll-periods.show', $period, false) }}" class="text-[var(--text-400)] hover:text-[var(--text-900)]" title="Ver">
                                 <x-lucide-eye class="w-4 h-4" />
                             </a>
-                            <button @click="duplicar({{ $period->id }}, {{ $period->client_id }})" title="Duplicar (copiar conceptos a un nuevo período)" class="text-[var(--text-400)] hover:text-[var(--color-primary)]">
+                            <button @click="duplicar({{ $period->id }}, {{ $period->client_id }})" title="Duplicar (copiar conceptos a un nuevo período)" class="text-[var(--text-400)] hover:text-[var(--text-900)]">
                                 <x-lucide-copy class="w-4 h-4" />
                             </button>
                         </div>
@@ -116,6 +124,7 @@
                 @endforeach
             </tbody>
         </table>
+    </div>
     </div>
     @if($periods->hasPages())
     <div class="px-6 py-4 border-t border-[var(--border-default)]">
@@ -153,7 +162,10 @@
                     <div class="w-9 h-9 bg-[var(--color-primary-light)] rounded-[var(--radius-control)] flex items-center justify-center">
                         <x-lucide-banknote class="w-4 h-4 text-[var(--color-primary)]" />
                     </div>
-                    <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Generar nómina</h2>
+                    <h2 class="text-[16px] font-bold text-[var(--text-900)]">Generar nómina</h2>
+                    <x-help-icon title="Generar nómina">
+                        Crea un desprendible por cada empleado activo del cliente para el rango de fechas indicado. Si ya generaste un período anterior, usa "Copiar conceptos desde" para partir de las mismas comisiones/bonificaciones/horas extra en vez de digitarlas de nuevo.
+                    </x-help-icon>
                 </div>
                 <button @click="cerrar()" class="p-2 rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)] text-[var(--text-400)] hover:text-[var(--text-700)]">
                     <x-lucide-x class="w-4 h-4" />
@@ -212,7 +224,7 @@
                     <button type="submit" class="h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">
                         Generar
                     </button>
-                    <button type="button" @click="cerrar()" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+                    <button type="button" @click="cerrar()" class="h-10 flex items-center px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
                         Cancelar
                     </button>
                 </div>

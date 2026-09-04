@@ -17,7 +17,7 @@
             <x-lucide-chevron-left class="w-4 h-4" />
         </a>
         <div>
-            <h1 class="text-[22px] font-semibold text-[var(--text-900)]">{{ $client->name }}</h1>
+            <p class="text-[22px] font-bold text-[var(--text-900)]">{{ $client->name }}</p>
             <p class="text-[12px] text-[var(--text-400)] mt-0.5">
                 Calendario Tributario · {{ $client->document_type }} {{ $client->document_number }}@if($client->dv)-{{ $client->dv }}@endif
             </p>
@@ -26,7 +26,7 @@
 
     <div class="flex flex-wrap items-center gap-2 sm:flex-nowrap">
         <button @click="openModal('ica')"
-            class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+            class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
             <x-lucide-building class="w-4 h-4" />
             ICA Municipal
         </button>
@@ -90,7 +90,7 @@
     <div class="space-y-3">
 
         {{-- Título panel --}}
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Próximos 30 días</h2>
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Próximos 30 días</h2>
 
         @if($upcomingList->isEmpty())
         <div class="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] p-6 text-center">
@@ -164,7 +164,7 @@
                 <div class="flex-1 min-w-0">
                     <p class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] mb-1"
                        x-text="selectedEvent?.extendedProps?.obligation_type"></p>
-                    <h3 class="text-[16px] font-semibold text-[var(--text-900)] leading-tight"
+                    <h3 class="text-[16px] font-bold text-[var(--text-900)] leading-tight"
                         x-text="selectedEvent?.title || '—'"></h3>
                     <p class="text-[14px] text-[var(--text-500)] mt-0.5"
                        x-text="selectedEvent?.extendedProps?.period || '—'"></p>
@@ -204,20 +204,21 @@
         </div>
 
         {{-- Footer --}}
-        <div x-show="selectedEvent?.extendedProps?.editable" class="flex gap-2 px-6 pb-5">
+        <div class="flex gap-2 px-6 pb-4">
             <button @click="completeEvent()"
-                x-show="selectedEvent?.extendedProps?.status === 'pending'"
+                x-show="selectedEvent?.extendedProps?.status !== 'completed'"
                 class="flex-1 h-10 bg-[var(--color-success)] hover:opacity-90 text-white text-[14px] font-medium rounded-[var(--radius-control)]">
                 Marcar cumplida
             </button>
             <button @click="deleteEvent()"
-                class="flex-1 h-10 border border-[var(--color-danger)]/30 text-[var(--color-danger)] hover:bg-[var(--color-danger-bg)] text-[14px] font-medium rounded-[var(--radius-control)]">
+                x-show="selectedEvent?.extendedProps?.editable"
+                class="flex-1 h-10 border bg-[var(--color-danger-bg)]/50 border-[var(--color-danger)]/30 text-[var(--color-danger)] hover:bg-[var(--color-danger-bg)] text-[14px] font-medium rounded-[var(--radius-control)]">
                 Eliminar
             </button>
         </div>
-        <div x-show="!selectedEvent?.extendedProps?.editable" class="px-6 pb-5">
-            <p class="text-[12px] text-[var(--text-400)] text-center">Calculado automáticamente a partir de las obligaciones tributarias del cliente.</p>
-        </div>
+        <p x-show="!selectedEvent?.extendedProps?.editable" class="text-[12px] text-[var(--text-400)] text-center px-6 pb-5 -mt-1">
+            Calculada a partir de las obligaciones tributarias del cliente — no se puede eliminar.
+        </p>
     </div>
 </div>
 
@@ -239,7 +240,7 @@
                         <x-lucide-building class="w-4 h-4 text-[var(--color-primary)]" />
                     </div>
                     <div>
-                        <h3 class="text-[16px] font-semibold text-[var(--text-900)]">ICA Municipal</h3>
+                        <h3 class="text-[16px] font-bold text-[var(--text-900)]">ICA Municipal</h3>
                         <p class="text-[12px] text-[var(--text-400)]">{{ $client->name }} — Industria y Comercio</p>
                     </div>
                 </div>
@@ -347,7 +348,7 @@
                 <span x-text="icaLoading ? 'Guardando...' : 'Guardar ICA'"></span>
             </button>
             <button @click="modal = null"
-                class="px-5 h-10 border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)]">
+                class="px-5 h-10 bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)]">
                 Cancelar
             </button>
         </div>
@@ -373,7 +374,7 @@
                         <x-lucide-plus class="w-4 h-4 text-[var(--color-primary)]" />
                     </div>
                     <div>
-                        <h3 class="text-[16px] font-semibold text-[var(--text-900)]">Nueva obligación</h3>
+                        <h3 class="text-[16px] font-bold text-[var(--text-900)]">Nueva obligación</h3>
                         <p class="text-[12px] text-[var(--text-400)]">{{ $client->name }} — registro manual</p>
                     </div>
                 </div>
@@ -468,7 +469,7 @@
                 <span x-text="manualLoading ? 'Guardando...' : 'Guardar obligación'"></span>
             </button>
             <button @click="modal = null"
-                class="px-5 h-10 border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)]">
+                class="px-5 h-10 bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)]">
                 Cancelar
             </button>
         </div>
@@ -596,11 +597,27 @@ function taxCalendar() {
         },
 
         async completeEvent() {
-            if (!this.selectedEventId) return;
-            await fetch(`/tax-events/${this.selectedEventId}/complete`, {
-                method: 'PATCH',
-                headers: { 'X-CSRF-TOKEN':csrfToken(), Accept:'application/json' },
-            }).catch(() => {});
+            if (!this.selectedEventId || !this.selectedEvent) return;
+            const props = this.selectedEvent.extendedProps;
+
+            if (props.editable) {
+                await fetch(`/tax-events/${this.selectedEventId}/complete`, {
+                    method: 'PATCH',
+                    headers: { 'X-CSRF-TOKEN':csrfToken(), Accept:'application/json' },
+                }).catch(() => {});
+            } else {
+                // Ocurrencia calculada: no tiene fila propia todavía, se identifica por
+                // obligation_type + fecha (ver TaxCalendarController::completeOccurrence()).
+                await fetch('{{ route("tax-events.complete-occurrence", $client) }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN':csrfToken(), Accept:'application/json' },
+                    body: JSON.stringify({
+                        obligation_type: props.obligation_type,
+                        due_date: this.selectedEvent.startStr,
+                        title: this.selectedEvent.title,
+                    }),
+                }).catch(() => {});
+            }
             this.modal = null;
             this.calendar?.refetchEvents();
         },

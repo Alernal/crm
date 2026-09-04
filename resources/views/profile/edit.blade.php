@@ -17,7 +17,7 @@
             {{ strtoupper(substr($user->name, 0, 2)) }}
         </div>
         <div>
-            <h2 class="text-[20px] font-semibold text-[var(--text-900)]">{{ $user->name }}</h2>
+            <h2 class="text-[20px] font-bold text-[var(--text-900)]">{{ $user->name }}</h2>
             <p class="text-[14px] text-[var(--text-500)] mt-0.5">{{ $user->email }}</p>
             @if($user->professional_card_number)
             <p class="text-[12px] text-[var(--color-primary)] font-medium mt-1">T.P. {{ $user->professional_card_number }}</p>
@@ -40,7 +40,7 @@
         {{-- ── Información personal y profesional ── --}}
         <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)]">
             <div class="px-6 py-4 border-b border-[var(--border-default)]">
-                <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Información personal y profesional</h2>
+                <h2 class="text-[16px] font-bold text-[var(--text-900)]">Información personal y profesional</h2>
                 <p class="text-[12px] text-[var(--text-400)] mt-0.5">Datos que aparecerán en tus cuentas de cobro y documentos.</p>
             </div>
             <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -59,6 +59,29 @@
                            value="{{ old('email', $user->email) }}" required
                            class="{{ $inputClass }}" />
                     @error('email')<p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="identification_type" class="{{ $labelClass }}">Tipo de identificación</label>
+                    <select id="identification_type" name="identification_type" class="{{ $inputClass }}">
+                        @foreach(['CC' => 'Cédula de ciudadanía', 'CE' => 'Cédula de extranjería', 'Pasaporte' => 'Pasaporte'] as $val => $lbl)
+                        <option value="{{ $val }}" {{ old('identification_type', $user->identification_type ?? 'CC') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
+                        @endforeach
+                    </select>
+                    @error('identification_type')<p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="identification_number" class="{{ $labelClass }}">
+                        Número de identificación
+                        <span class="text-[12px] text-[var(--text-400)] font-normal">(cédula)</span>
+                    </label>
+                    <input id="identification_number" name="identification_number" type="text"
+                           value="{{ old('identification_number', $user->identification_number) }}"
+                           placeholder="Ej. 1102866622"
+                           class="{{ $inputClass }}" />
+                    <p class="mt-1 text-[12px] text-[var(--text-400)]">Aparece en contratos y propuestas — distinta del NIT y la tarjeta profesional.</p>
+                    @error('identification_number')<p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
@@ -116,7 +139,7 @@
         <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)]"
              x-data="{ preview: '{{ $user->logo_path ? Storage::url($user->logo_path) : '' }}' }">
             <div class="px-6 py-4 border-b border-[var(--border-default)]">
-                <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Logo para cuentas de cobro</h2>
+                <h2 class="text-[16px] font-bold text-[var(--text-900)]">Logo para cuentas de cobro</h2>
                 <p class="text-[12px] text-[var(--text-400)] mt-0.5">Opcional · PNG, JPG o WEBP · máx. 2 MB</p>
             </div>
             <div class="px-6 py-5">
@@ -138,7 +161,7 @@
                                x-on:change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : preview"
                                class="block w-full text-[13px] text-[var(--text-500)] file:mr-3 file:py-1.5 file:px-4 file:rounded-[var(--radius-control)] file:border file:border-[var(--border-default)] file:text-[13px] file:font-medium file:bg-[var(--surface-muted)] file:text-[var(--text-700)] hover:file:bg-[var(--border-default)] file:cursor-pointer" />
                         @error('logo')<p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>@enderror
-                        <p class="mt-2 text-[12px] text-[var(--text-400)]">El logo se ajustará dentro del espacio 2:1 del encabezado del PDF. Para mejores resultados usa una imagen apaisada con fondo transparente o blanco.</p>
+                        <p class="mt-2 text-[12px] text-[var(--text-400)]">El logo se ajustará dentro del espacio 2:1 del encabezado del PDF. Para mejores resultados usa una imagen apaisada con fondo transparente o blanco, de al menos 840x336 píxeles.</p>
                         @if($user->logo_path)
                         <button type="submit" form="logo-delete-form"
                                 x-on:click="preview = ''"
@@ -154,7 +177,7 @@
         {{-- ── Datos bancarios ── --}}
         <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)]">
             <div class="px-6 py-4 border-b border-[var(--border-default)]">
-                <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Datos bancarios para cobros</h2>
+                <h2 class="text-[16px] font-bold text-[var(--text-900)]">Datos bancarios para cobros</h2>
                 <p class="text-[12px] text-[var(--text-400)] mt-0.5">Aparecen en el PDF de la cuenta de cobro.</p>
             </div>
             <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -246,7 +269,7 @@
     {{-- ── Cambiar contraseña ── --}}
     <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)]">
         <div class="px-6 py-4 border-b border-[var(--border-default)]">
-            <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Cambiar contraseña</h2>
+            <h2 class="text-[16px] font-bold text-[var(--text-900)]">Cambiar contraseña</h2>
             <p class="text-[12px] text-[var(--text-400)] mt-0.5">Usa una contraseña larga y difícil de adivinar.</p>
         </div>
 
@@ -302,7 +325,7 @@
     {{-- ── Documentos (acceso rápido) ── --}}
     <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)]">
         <div class="px-6 py-4 border-b border-[var(--border-default)]">
-            <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Documentos de identidad profesional</h2>
+            <h2 class="text-[16px] font-bold text-[var(--text-900)]">Documentos de identidad profesional</h2>
             <p class="text-[12px] text-[var(--text-400)] mt-0.5">Cédula y tarjeta profesional para generar documentos con marca de agua.</p>
         </div>
         <div class="px-6 py-5 flex items-center justify-between">
@@ -319,7 +342,7 @@
                 </div>
             </div>
             <a href="{{ Route::has('documents.index') ? route('documents.index') : '#' }}"
-               class="inline-flex items-center h-10 px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+               class="inline-flex items-center h-10 px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
                 Gestionar documentos →
             </a>
         </div>
@@ -328,14 +351,14 @@
     {{-- ── Zona de peligro ── --}}
     <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--color-danger)]/20">
         <div class="px-6 py-4 border-b border-[var(--color-danger)]/20">
-            <h2 class="text-[16px] font-semibold text-[var(--color-danger)]">Zona de peligro</h2>
+            <h2 class="text-[16px] font-bold text-[var(--color-danger)]">Zona de peligro</h2>
             <p class="text-[12px] text-[var(--text-400)] mt-0.5">Eliminar la cuenta es una acción permanente e irreversible.</p>
         </div>
         <div class="px-6 py-5">
             <button
                 x-data=""
                 x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-                class="inline-flex items-center h-10 px-4 rounded-[var(--radius-control)] border border-[var(--color-danger)]/30 text-[var(--color-danger)] text-[14px] font-medium hover:bg-[var(--color-danger-bg)]">
+                class="inline-flex items-center h-10 px-4 rounded-[var(--radius-control)] border bg-[var(--color-danger-bg)]/50 border-[var(--color-danger)]/30 text-[var(--color-danger)] text-[14px] font-medium hover:bg-[var(--color-danger-bg)]">
                 Eliminar mi cuenta
             </button>
         </div>
@@ -349,7 +372,7 @@
         @csrf
         @method('DELETE')
 
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">¿Eliminar cuenta permanentemente?</h2>
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">¿Eliminar cuenta permanentemente?</h2>
         <p class="mt-2 text-[14px] text-[var(--text-500)]">
             Esta acción eliminará todos tus datos: clientes, cuentas de cobro, documentos y configuración. No se puede deshacer.
         </p>
@@ -372,7 +395,7 @@
                 Sí, eliminar cuenta
             </button>
             <button type="button" x-on:click="$dispatch('close')"
-                    class="h-10 px-4 border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)]">
+                    class="h-10 px-4 bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium rounded-[var(--radius-control)] hover:bg-[var(--surface-muted)]">
                 Cancelar
             </button>
         </div>

@@ -47,16 +47,7 @@
         margin-bottom: 18pt;
         border-bottom: 2pt solid #111;
     }
-    .header-left  { width: 38%; float: left; }
-    .header-right { width: 60%; float: right; text-align: right; padding-top: 4pt; }
-
-    .logo-box {
-        width: 130pt; height: 65pt;
-        border: 1pt solid #ddd; background: #fafafa;
-        overflow: hidden; display: flex;
-        align-items: center; justify-content: center;
-    }
-    .logo-box img { max-width: 124pt; max-height: 59pt; object-fit: contain; }
+    .header-right { width: 100%; text-align: right; padding-top: 4pt; }
 
     .doc-title      { font-size: 18pt; font-weight: bold; color: #111; letter-spacing: 0.5pt; margin-bottom: 4pt; }
     .client-name    { font-size: 11pt; font-weight: bold; color: #333; margin-bottom: 6pt; }
@@ -145,15 +136,10 @@
     $totalPagos     = $allPayments->sum('amount');
 @endphp
 
-{{-- Cabecera --}}
+{{-- Cabecera — sin logo a propósito (a pedido explícito del usuario: solo
+     Cuentas de Cobro y Certificado de Ingresos, documentos que emite a su
+     nombre, conservan el logo) --}}
 <div class="header clearfix">
-    <div class="header-left">
-        @if($user->logo_path && file_exists(storage_path('app/public/' . $user->logo_path)))
-        <div class="logo-box">
-            <img src="{{ asset('storage/' . $user->logo_path) }}" alt="Logo" />
-        </div>
-        @endif
-    </div>
     <div class="header-right">
         <div class="doc-title">ESTADO DE CUENTA</div>
         <div class="client-name">{{ $client->name }}</div>

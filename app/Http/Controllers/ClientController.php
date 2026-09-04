@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
+use App\Models\Channel;
 use App\Models\Client;
 use App\Models\Invoice;
+use App\Models\User;
 use App\Services\VirtualArchiveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -30,11 +32,7 @@ class ClientController extends Controller
             $query->where('status', $status);
         }
 
-        if ($regime = $request->get('regime')) {
-            $query->where('tax_regime', $regime);
-        }
-
-        $clients       = $query->orderBy('name')->paginate(20)->withQueryString();
+        $clients       = $query->orderBy('consecutive_number')->paginate(20)->withQueryString();
         $totalActive   = $request->user()->clients()->where('status', 'active')->count();
         $totalInactive = $request->user()->clients()->where('status', 'inactive')->count();
 
@@ -49,9 +47,16 @@ class ClientController extends Controller
     public function store(StoreClientRequest $request, VirtualArchiveService $archive): RedirectResponse
     {
         DB::transaction(function () use ($request, $archive) {
-            $data = array_merge($request->validated(), ['payroll_pila_exempt' => $request->boolean('payroll_pila_exempt')]);
+            $owner = User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
+            $owner->increment('client_consecutive');
+
+            $data = array_merge($request->validated(), [
+                'payroll_pila_exempt' => $request->boolean('payroll_pila_exempt'),
+                'consecutive_number'  => $owner->client_consecutive,
+            ]);
             $client = $request->user()->clients()->create($data);
             $archive->createClientFolders($client);
+            Channel::findOrCreateForContext($request->user(), $client, $client->name);
         });
 
         return redirect()->route('clients.index')

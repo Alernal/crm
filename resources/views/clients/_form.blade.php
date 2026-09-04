@@ -18,7 +18,7 @@
 {{-- SECCIÓN 1: Identificación --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
     <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Identificación</h2>
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Identificación</h2>
     </div>
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 
@@ -28,7 +28,7 @@
             <div class="flex gap-4">
                 @foreach(['juridica' => 'Persona Jurídica', 'natural' => 'Persona Natural'] as $val => $lbl)
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="person_type" value="{{ $val }}"
+                    <input type="radio" name="person_type" value="{{ $val }}" x-model="personType"
                            {{ old('person_type', $client?->person_type ?? 'juridica') === $val ? 'checked' : '' }}
                            class="text-[var(--color-primary)] border-[var(--border-strong)] focus:ring-[var(--color-primary-light)]" />
                     <span class="text-[14px] text-[var(--text-700)]">{{ $lbl }}</span>
@@ -36,6 +36,56 @@
                 @endforeach
             </div>
             @error('person_type')<p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>@enderror
+        </div>
+
+        {{-- Representante legal (solo persona jurídica) — quien firma los contratos generados por el Motor Documental --}}
+        <div class="lg:col-span-3" x-show="personType === 'juridica'" x-transition>
+            <div class="border-t border-[var(--border-default)] pt-5">
+                <p class="text-[13px] font-semibold text-[var(--text-700)] mb-3">
+                    Representante Legal
+                    <span class="text-[12px] text-[var(--text-400)] font-normal">(quien firma los contratos en nombre de la empresa)</span>
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="sm:col-span-2 lg:col-span-2">
+                        <label for="legal_representative_name" class="{{ $labelClass }}">Nombre completo</label>
+                        <input id="legal_representative_name" name="legal_representative_name" type="text"
+                               value="{{ old('legal_representative_name', $client?->legal_representative_name) }}"
+                               placeholder="Nombre completo del representante legal"
+                               class="{{ $inputClass }}" />
+                        @error('legal_representative_name')<p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label for="legal_representative_document_type" class="{{ $labelClass }}">Tipo de documento</label>
+                        <select id="legal_representative_document_type" name="legal_representative_document_type" class="{{ $inputClass }}">
+                            @foreach(['CC' => 'Cédula de ciudadanía', 'CE' => 'Cédula de extranjería', 'Pasaporte' => 'Pasaporte'] as $val => $lbl)
+                            <option value="{{ $val }}" {{ old('legal_representative_document_type', $client?->legal_representative_document_type ?? 'CC') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
+                            @endforeach
+                        </select>
+                        @error('legal_representative_document_type')<p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <label for="legal_representative_document_number" class="{{ $labelClass }}">Número de documento</label>
+                        <input id="legal_representative_document_number" name="legal_representative_document_number" type="text"
+                               value="{{ old('legal_representative_document_number', $client?->legal_representative_document_number) }}"
+                               class="{{ $inputClass }}" />
+                        @error('legal_representative_document_number')<p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="sm:col-span-2 lg:col-span-4">
+                        <label for="chamber_of_commerce_city" class="{{ $labelClass }}">
+                            Cámara de Comercio
+                            <span class="text-[12px] text-[var(--text-400)] font-normal">(ciudad de registro mercantil — si se deja vacío, se usa la ciudad del cliente)</span>
+                        </label>
+                        <input id="chamber_of_commerce_city" name="chamber_of_commerce_city" type="text"
+                               value="{{ old('chamber_of_commerce_city', $client?->chamber_of_commerce_city) }}"
+                               placeholder="Bogotá"
+                               class="{{ $inputClass }} max-w-xs" />
+                        @error('chamber_of_commerce_city')<p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{-- Nombre / Razón social --}}
@@ -92,7 +142,7 @@
 {{-- SECCIÓN 2: Información tributaria --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
     <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Información tributaria</h2>
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Información tributaria</h2>
     </div>
     <div class="px-6 py-5 space-y-5">
 
@@ -155,7 +205,7 @@
 {{-- SECCIÓN 3: Contacto --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
     <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Contacto</h2>
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Contacto</h2>
     </div>
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
 
@@ -207,7 +257,7 @@
         <div class="sm:col-span-2">
             <label for="contact_person" class="{{ $labelClass }}">
                 Persona de contacto
-                <span class="text-[12px] text-[var(--text-400)] font-normal">(representante legal, tesorero, etc.)</span>
+                <span class="text-[12px] text-[var(--text-400)] font-normal">(contador interno, asistente, tesorero, etc.)</span>
             </label>
             <input id="contact_person" name="contact_person" type="text"
                    value="{{ old('contact_person', $client?->contact_person) }}"
@@ -222,7 +272,7 @@
 {{-- SECCIÓN 4: Numeración de cuentas de cobro --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
     <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Numeración de cuentas de cobro</h2>
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Numeración de cuentas de cobro</h2>
     </div>
     <div class="px-6 py-5 space-y-4">
 
@@ -280,7 +330,7 @@
 {{-- SECCIÓN 4b: Configuración de nómina --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
     <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Configuración de nómina</h2>
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Configuración de nómina</h2>
     </div>
     <div class="px-6 py-5 space-y-4">
 
@@ -334,7 +384,7 @@
 {{-- SECCIÓN 5: Otros --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
     <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Otros</h2>
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Otros</h2>
     </div>
     <div class="px-6 py-5 space-y-4">
 
@@ -363,6 +413,7 @@
 <script>
 function clientForm() {
     return {
+        personType:     '{{ old('person_type', $client?->person_type ?? 'juridica') }}',
         docType:        '{{ old('document_type', $client?->document_type ?? 'NIT') }}',
         docNumber:      '{{ old('document_number', $client?->document_number ?? '') }}',
         dv:             '{{ old('dv', $client?->dv ?? '') }}',

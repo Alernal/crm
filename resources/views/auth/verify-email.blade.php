@@ -1,6 +1,6 @@
 <x-guest-layout>
     <div class="mb-8">
-        <h2 class="text-[22px] font-semibold text-[var(--text-900)]">Verifica tu correo</h2>
+        <h1 class="text-[22px] font-bold text-[var(--text-900)]">Verifica tu correo</h1>
         <p class="mt-2 text-[var(--text-500)] text-[14px]">
             {{ __('¡Gracias por registrarte! Antes de comenzar, ¿podrías verificar tu correo electrónico haciendo clic en el enlace que acabamos de enviarte? Si no recibiste el correo, con gusto te enviaremos otro.') }}
         </p>

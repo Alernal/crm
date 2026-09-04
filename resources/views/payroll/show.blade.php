@@ -3,9 +3,9 @@
 
 @php
     $fieldClass = 'w-full h-10 px-3.5 border border-[var(--border-default)] rounded-[var(--radius-control)] text-[14px] bg-[var(--surface-card)] text-[var(--text-700)] focus:ring-2 focus:ring-[var(--color-primary-light)] focus:border-[var(--color-primary)] outline-none';
-    $th = 'text-[10px] font-medium text-[var(--text-400)] uppercase tracking-[0.04em] px-3 py-2 text-right whitespace-nowrap';
-    $thGroup = 'text-[10px] font-semibold uppercase tracking-[0.04em] px-3 py-1.5 text-center whitespace-nowrap border-b border-[var(--border-default)]';
-    $td = 'px-3 py-2.5 text-right text-[13px] text-[var(--text-700)] whitespace-nowrap';
+    $th = 'text-[10px] font-semibold text-[var(--text-400)] uppercase tracking-[0.04em] px-3 py-2.5 text-right whitespace-nowrap';
+    $thGroup = 'text-[10px] font-semibold uppercase tracking-[0.04em] px-3 py-2 text-center whitespace-nowrap border-b border-[var(--border-default)]';
+    $td = 'px-3 py-2.5 text-right text-[13px] text-[var(--text-700)] whitespace-nowrap tabular-nums';
     $editable = $payrollPeriod->status === 'borrador';
     $canEditConcepts = in_array($payrollPeriod->status, ['borrador', 'procesada'], true);
 
@@ -39,14 +39,16 @@
 
 <div x-data="payrollShow(@js($rowsData))" @keydown.escape.window="closeModals()">
 
-<nav class="flex items-center gap-1.5 text-[14px] text-[var(--text-400)] mb-4">
-    <a href="{{ route('payroll-periods.index', [], false) }}" class="hover:text-[var(--color-primary)]">Períodos de Nómina</a>
-    <x-lucide-chevron-right class="w-3.5 h-3.5" />
-    <span class="text-[var(--text-700)] font-medium">{{ $payrollPeriod->number }}</span>
-</nav>
+<a href="{{ route('payroll-periods.index', [], false) }}"
+   class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[14px] font-medium text-[var(--text-700)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-900)] mb-4">
+    <x-lucide-arrow-left class="w-4 h-4" />
+    Volver
+</a>
 
 @if(session('success'))
-<div class="mb-5 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
+<div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)" x-show="show"
+     x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+     class="mb-5 flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
     <x-lucide-check-circle class="w-4 h-4 flex-shrink-0" />
     {{ session('success') }}
 </div>
@@ -56,7 +58,7 @@
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)] p-6 mb-5">
     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-            <h1 class="text-[22px] font-semibold text-[var(--text-900)]">{{ $payrollPeriod->number }} — {{ $payrollPeriod->client->name }}</h1>
+            <p class="text-[22px] font-bold text-[var(--text-900)]">{{ $payrollPeriod->number }} — {{ $payrollPeriod->client->name }}</p>
             <p class="text-[14px] text-[var(--text-500)] mt-0.5">
                 {{ \App\Models\PayrollPeriod::PERIOD_TYPES[$payrollPeriod->period_type] }}
                 &bull; {{ $payrollPeriod->start_date->format('d/m/Y') }} – {{ $payrollPeriod->end_date->format('d/m/Y') }}
@@ -70,17 +72,17 @@
         </div>
         <div class="flex items-center gap-2 flex-shrink-0">
             <a href="{{ route('payroll-periods.index', ['client_id' => $payrollPeriod->client_id, 'duplicate_from' => $payrollPeriod->id], false) }}"
-               class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+               class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
                 <x-lucide-copy class="w-4 h-4" />
                 Duplicar
             </a>
             <a href="{{ route('payroll-periods.pdf', $payrollPeriod, false) }}"
-               class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+               class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
                 <x-lucide-download class="w-4 h-4" />
                 Descargar PDF
             </a>
             <button @click="printUrl = '{{ route('payroll-periods.print', $payrollPeriod, false) }}'; isPrinting = true"
-               class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+               class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
                 <x-lucide-printer class="w-4 h-4" />
                 Imprimir
             </button>
@@ -98,7 +100,7 @@
             <form method="POST" action="{{ route('payroll-periods.destroy', $payrollPeriod, false) }}"
                   x-data="" x-on:submit.prevent="if(confirm('¿Eliminar este período de nómina? Esta acción no se puede deshacer.')) $el.submit()">
                 @csrf @method('DELETE')
-                <button type="submit" class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--color-danger)]/30 text-[var(--color-danger)] text-[14px] font-medium hover:bg-[var(--color-danger-bg)]">
+                <button type="submit" class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border bg-[var(--color-danger-bg)]/50 border-[var(--color-danger)]/30 text-[var(--color-danger)] text-[14px] font-medium hover:bg-[var(--color-danger-bg)]">
                     <x-lucide-trash-2 class="w-4 h-4" />
                     Eliminar
                 </button>
@@ -131,10 +133,16 @@
 
 {{-- Tabla de nómina --}}
 <div class="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] overflow-hidden">
-    <div class="overflow-x-auto">
+    <div class="px-4 py-3 border-b border-[var(--border-default)] flex items-center gap-2">
+        <h3 class="text-[13px] font-semibold text-[var(--text-900)]">Detalle por empleado</h3>
+        <x-help-icon title="Detalle por empleado">
+            Usa "Editar conceptos" en cada fila para ajustar comisiones, bonificaciones, viáticos y deducciones manuales, y "Horas extra" para registrar recargos/horas extra por tipo legal. Los días laborados, la seguridad social y las prestaciones se recalculan automáticamente al guardar.
+        </x-help-icon>
+    </div>
+    <div class="overflow-x-auto p-3">
         <table class="w-full border-collapse">
             <thead>
-                <tr>
+                <tr class="bg-[var(--surface-subtle)]">
                     <th rowspan="2" class="{{ $th }} text-left sticky left-0 bg-[var(--surface-card)] z-10">Empleado</th>
                     <th rowspan="2" class="{{ $th }}">Días</th>
                     <th colspan="7" class="{{ $thGroup }} text-[var(--text-700)] bg-[var(--surface-subtle)]">Devengado salarial</th>
@@ -146,7 +154,7 @@
                     <th colspan="4" class="{{ $thGroup }} text-[var(--text-700)] bg-[var(--surface-subtle)]">Provisión prestaciones sociales</th>
                     <th rowspan="2" class="{{ $th }} text-center">Acciones</th>
                 </tr>
-                <tr class="border-b border-[var(--border-default)]">
+                <tr class="bg-[var(--surface-subtle)] border-b border-[var(--border-default)]">
                     <th class="{{ $th }}">Básico</th>
                     <th class="{{ $th }}">H. Extra</th>
                     <th class="{{ $th }}">Comisiones</th>
@@ -182,7 +190,7 @@
             </thead>
             <tbody>
                 @foreach($payrollPeriod->payrolls as $payroll)
-                <tr class="border-b border-[var(--surface-muted)] hover:bg-[var(--surface-subtle)]">
+                <tr class="border-b border-[var(--surface-muted)] border-l-[3px] border-l-transparent hover:border-l-[var(--color-primary)] hover:bg-[var(--surface-subtle)]">
                     <td class="px-3 py-2.5 text-[13px] font-medium text-[var(--text-900)] whitespace-nowrap sticky left-0 bg-[var(--surface-card)]">
                         {{ $payroll->employee->full_name }}
                     </td>
@@ -208,7 +216,7 @@
                     <td class="{{ $td }}">{{ number_format($payroll->withholding_tax, 0, ',', '.') }}</td>
                     <td class="{{ $td }}">{{ number_format($payroll->other_deductions, 0, ',', '.') }}</td>
                     <td class="{{ $td }} font-semibold text-[var(--color-danger-text)]">{{ number_format($payroll->total_deductions, 0, ',', '.') }}</td>
-                    <td class="px-3 py-2.5 text-right text-[14px] font-bold text-[var(--text-900)] whitespace-nowrap bg-[var(--color-primary-light)]/40">
+                    <td class="px-3 py-2.5 text-right text-[14px] font-bold text-[var(--text-900)] whitespace-nowrap bg-[var(--color-primary-light)]/40 tabular-nums">
                         {{ number_format($payroll->net_pay, 0, ',', '.') }}
                     </td>
                     <td class="{{ $td }}">{{ number_format($payroll->health_employer, 0, ',', '.') }}</td>

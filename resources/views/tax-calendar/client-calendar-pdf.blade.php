@@ -20,6 +20,7 @@
         .badge-pending  { background: #f1f5f9; color: #64748b; }
         .badge-upcoming { background: #fef3c7; color: #92400e; }
         .badge-overdue  { background: #fee2e2; color: #dc2626; }
+        .badge-done     { background: #d1fae5; color: #065f46; }
         .footer { margin-top: 16px; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 8px; color: #94a3b8; text-align: center; }
         .code { font-family: monospace; font-size: 8px; color: #1e40af; }
     </style>
@@ -51,8 +52,8 @@
             @foreach ($events as $event)
                 @php
                     $days   = $event['days_left'];
-                    $badge  = $event['status'] === 'vencido' ? 'badge-overdue' : ($event['status'] === 'proximo' ? 'badge-upcoming' : 'badge-pending');
-                    $label  = ['pendiente'=>'Pendiente','proximo'=>'Próxima','vencido'=>'Vencida'][$event['status']] ?? $event['status'];
+                    $badge  = ['vencido' => 'badge-overdue', 'proximo' => 'badge-upcoming', 'completado' => 'badge-done'][$event['status']] ?? 'badge-pending';
+                    $label  = ['pendiente'=>'Pendiente','proximo'=>'Próxima','vencido'=>'Vencida','completado'=>'Cumplida'][$event['status']] ?? $event['status'];
                 @endphp
                 <tr>
                     <td>{{ $event['name'] }}</td>

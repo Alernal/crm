@@ -4,15 +4,17 @@
 <div class="max-w-5xl mx-auto space-y-5">
 
     {{-- Breadcrumb --}}
-    <nav class="flex items-center gap-1.5 text-[14px] text-[var(--text-400)] mb-1">
-        <a href="{{ route('clients.index') }}" class="hover:text-[var(--color-primary)]">Clientes</a>
-        <x-lucide-chevron-right class="w-3.5 h-3.5" />
-        <span class="text-[var(--text-700)] font-medium truncate">{{ $client->name }}</span>
-    </nav>
+    <a href="{{ route('clients.index') }}"
+       class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[14px] font-medium text-[var(--text-700)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-900)] mb-1">
+        <x-lucide-arrow-left class="w-4 h-4" />
+        Volver
+    </a>
 
     {{-- Flash --}}
     @if(session('success'))
-    <div class="flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
+    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)" x-show="show"
+         x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="flex items-center gap-2 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 text-[var(--color-success-text)] text-[14px] px-4 py-3 rounded-[var(--radius-control)]">
         <x-lucide-check-circle class="w-4 h-4 flex-shrink-0" />
         {{ session('success') }}
     </div>
@@ -26,7 +28,7 @@
                     {{ strtoupper(substr($client->name, 0, 2)) }}
                 </div>
                 <div>
-                    <h1 class="text-[22px] font-semibold text-[var(--text-900)]">{{ $client->name }}</h1>
+                    <p class="text-[22px] font-bold text-[var(--text-900)]">{{ $client->name }}</p>
                     <p class="text-[14px] text-[var(--text-500)] mt-0.5">
                         {{ $client->document_type }} {{ $client->full_document }}
                         &bull; {{ $client->person_type === 'natural' ? 'Persona Natural' : 'Persona Jurídica' }}
@@ -42,8 +44,13 @@
 
             {{-- Acciones --}}
             <div class="flex items-center gap-2 flex-shrink-0">
+                <a href="{{ route('communications.context.open', ['type' => 'cliente', 'id' => $client->id]) }}"
+                   class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+                    <x-lucide-message-square class="w-4 h-4" />
+                    Comunicación
+                </a>
                 <a href="{{ route('clients.edit', $client) }}"
-                   class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+                   class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
                     <x-lucide-edit-2 class="w-4 h-4" />
                     Editar
                 </a>
@@ -52,7 +59,7 @@
                       x-on:submit.prevent="if(confirm('¿Eliminar a {{ addslashes($client->name) }}? Se eliminarán también sus cuentas de cobro y eventos tributarios.')) $el.submit()">
                     @csrf @method('DELETE')
                     <button type="submit"
-                            class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border border-[var(--color-danger)]/30 text-[var(--color-danger)] text-[14px] font-medium hover:bg-[var(--color-danger-bg)]">
+                            class="inline-flex items-center gap-[6px] h-10 px-4 rounded-[var(--radius-control)] border bg-[var(--color-danger-bg)]/50 border-[var(--color-danger)]/30 text-[var(--color-danger)] text-[14px] font-medium hover:bg-[var(--color-danger-bg)]">
                         <x-lucide-trash-2 class="w-4 h-4" />
                         Eliminar
                     </button>
@@ -142,19 +149,7 @@
     </div>
 
     {{-- ===== ACCESOS RÁPIDOS DE MÓDULOS ===== --}}
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {{-- Archivo Virtual --}}
-        <a href="{{ route('archive.files.index', $client) }}"
-           class="flex items-center gap-3 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] p-4 hover:shadow-[var(--shadow-card-hover)]">
-            <div class="w-10 h-10 rounded-[var(--radius-control)] bg-[var(--color-primary-light)] flex items-center justify-center flex-shrink-0">
-                <x-lucide-folder class="w-5 h-5 text-[var(--color-primary)]" />
-            </div>
-            <div>
-                <p class="text-[14px] font-semibold text-[var(--text-900)]">Archivo Virtual</p>
-                <p class="text-[12px] text-[var(--text-400)]">Documentos</p>
-            </div>
-        </a>
-
+    <div class="grid grid-cols-2 gap-4">
         {{-- Cartera --}}
         <a href="{{ route('cartera.client', $client) }}"
            class="flex items-center gap-3 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] p-4 hover:shadow-[var(--shadow-card-hover)]">
@@ -185,18 +180,19 @@
 
         {{-- Cuentas de cobro recientes --}}
         <div class="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)]">
-            <div class="px-6 py-5 border-b border-[var(--border-default)] flex items-center justify-between">
-                <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Cuentas de cobro</h2>
+            <div class="px-6 py-5 flex items-center justify-between">
+                <h2 class="text-[16px] font-bold text-[var(--text-900)]">Cuentas de cobro</h2>
                 <a href="{{ Route::has('invoices.create') ? route('invoices.create').'?client='.$client->id : '#' }}"
                    class="text-[13px] text-[var(--color-primary)] hover:underline font-medium">+ Nueva cuenta</a>
             </div>
+            <div class="mx-3 border-b border-[var(--border-default)]"></div>
             @if($recentInvoices->isEmpty())
             <div class="flex flex-col items-center justify-center py-10 text-center">
                 <p class="text-[14px] font-semibold text-[var(--text-700)]">Sin cuentas de cobro</p>
                 <p class="text-[12px] text-[var(--text-400)] mt-1">Aún no hay cuentas emitidas</p>
             </div>
             @else
-            <div>
+            <div class="p-3 divide-y divide-[var(--border-default)]">
                 @foreach($recentInvoices as $invoice)
                 @php
                     $badge = match($invoice->status) {
@@ -208,7 +204,7 @@
                         default     => ['text' => $invoice->status, 'variant' => 'neutral'],
                     };
                 @endphp
-                <div class="px-6 py-[14px] flex items-center justify-between gap-3 border-b border-[var(--border-default)] last:border-b-0 hover:bg-[var(--surface-subtle)]">
+                <div class="px-3 py-3 flex items-center justify-between gap-3 rounded-[var(--radius-control)] hover:bg-[var(--surface-subtle)]">
                     <div>
                         <p class="text-[14px] font-medium text-[var(--color-primary)]">{{ $invoice->number }}</p>
                         <p class="text-[12px] text-[var(--text-400)]">{{ $invoice->issue_date->format('d/m/Y') }}</p>
@@ -225,8 +221,8 @@
 
         {{-- Próximos vencimientos tributarios --}}
         <div class="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)]">
-            <div class="px-6 py-5 border-b border-[var(--border-default)] flex items-center justify-between">
-                <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Vencimientos tributarios</h2>
+            <div class="px-6 py-5 flex items-center justify-between">
+                <h2 class="text-[16px] font-bold text-[var(--text-900)]">Vencimientos tributarios</h2>
                 <div class="flex items-center gap-3">
                     <a href="{{ route('tax-events.client-calendar', $client) }}"
                        class="text-[13px] text-[var(--color-primary)] hover:underline font-medium">Ver calendario completo</a>
@@ -234,13 +230,14 @@
                        class="text-[13px] text-[var(--text-500)] hover:text-[var(--text-900)] font-medium">+ Agregar evento</a>
                 </div>
             </div>
+            <div class="mx-3 border-b border-[var(--border-default)]"></div>
             @if($upcomingEvents->isEmpty())
             <div class="flex flex-col items-center justify-center py-10 text-center">
                 <p class="text-[14px] font-semibold text-[var(--text-700)]">Sin eventos tributarios</p>
                 <p class="text-[12px] text-[var(--text-400)] mt-1">No hay obligaciones pendientes</p>
             </div>
             @else
-            <div>
+            <div class="p-3 divide-y divide-[var(--border-default)]">
                 @foreach($upcomingEvents as $event)
                 @php
                     $days    = now()->startOfDay()->diffInDays($event->due_date->startOfDay(), false);
@@ -249,7 +246,7 @@
                     $dotColor = $urgent ? 'var(--color-danger)' : ($warning ? 'var(--color-warning)' : 'var(--color-primary)');
                     $textColor = $urgent ? 'var(--color-danger)' : ($warning ? 'var(--color-warning)' : 'var(--text-700)');
                 @endphp
-                <div class="px-6 py-[14px] flex items-center gap-3 border-b border-[var(--border-default)] last:border-b-0 hover:bg-[var(--surface-subtle)]">
+                <div class="px-3 py-3 flex items-center gap-3 rounded-[var(--radius-control)] hover:bg-[var(--surface-subtle)]">
                     <div class="w-2 h-2 rounded-full flex-shrink-0" style="background: {{ $dotColor }};"></div>
                     <div class="flex-1 min-w-0">
                         <p class="text-[13px] font-medium text-[var(--text-900)] truncate">{{ $event->title }}</p>

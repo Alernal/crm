@@ -18,7 +18,7 @@
         {{-- Card: Documento actual --}}
         <div class="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)]">
             <div class="px-5 py-4 border-b border-[var(--border-default)]">
-                <h2 class="text-[16px] font-semibold text-[var(--text-900)]">{{ $label }}</h2>
+                <h2 class="text-[16px] font-bold text-[var(--text-900)]">{{ $label }}</h2>
             </div>
 
             <div class="p-5">
@@ -88,7 +88,7 @@
         {{-- Card: Marca de agua --}}
         <div class="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)]">
             <div class="px-5 py-4 border-b border-[var(--border-default)]">
-                <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Marca de agua</h2>
+                <h2 class="text-[16px] font-bold text-[var(--text-900)]">Marca de agua</h2>
             </div>
 
             <div class="p-5 space-y-4">
@@ -149,7 +149,7 @@
                         type="button"
                         @click="printPdf()"
                         :disabled="!watermarkText || !imageLoaded"
-                        class="flex-1 inline-flex items-center justify-center gap-2 h-10 border border-[var(--border-default)] hover:bg-[var(--surface-muted)] disabled:bg-[var(--surface-muted)] disabled:text-[var(--text-400)] disabled:cursor-not-allowed text-[var(--text-700)] text-[14px] font-medium rounded-[var(--radius-control)]"
+                        class="flex-1 inline-flex items-center justify-center gap-2 h-10 bg-[var(--surface-subtle)] border border-[var(--border-default)] hover:bg-[var(--surface-muted)] disabled:bg-[var(--surface-muted)] disabled:text-[var(--text-400)] disabled:cursor-not-allowed text-[var(--text-700)] text-[14px] font-medium rounded-[var(--radius-control)]"
                     >
                         <x-lucide-printer class="w-4 h-4" />
                         Imprimir
@@ -169,7 +169,7 @@
         <div class="bg-[var(--surface-subtle)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] flex-1 flex flex-col">
             <div class="px-5 py-4 border-b border-[var(--border-default)]">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-[16px] font-semibold text-[var(--text-900)] flex items-center gap-2">
+                    <h2 class="text-[16px] font-bold text-[var(--text-900)] flex items-center gap-2">
                         <x-lucide-eye class="w-4 h-4 text-[var(--color-primary)]" />
                         Vista previa en vivo
                     </h2>

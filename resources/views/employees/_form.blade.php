@@ -11,8 +11,11 @@
 
 {{-- SECCIÓN 1: Datos personales --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
-    <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Datos personales</h2>
+    <div class="px-6 py-4 border-b border-[var(--border-default)] flex items-center gap-2">
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Datos personales</h2>
+        <x-help-icon title="Datos personales">
+            Identificación básica del trabajador. El cliente (empresa) determina a qué nómina pertenece — es obligatorio y no se puede cambiar después sin afectar sus períodos ya generados.
+        </x-help-icon>
     </div>
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 
@@ -80,8 +83,11 @@
 
 {{-- SECCIÓN 2: Datos laborales --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
-    <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Datos laborales</h2>
+    <div class="px-6 py-4 border-b border-[var(--border-default)] flex items-center gap-2">
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Datos laborales</h2>
+        <x-help-icon title="Datos laborales">
+            El tipo de contrato afecta cómo se liquida una eventual indemnización al terminar el contrato. La jornada semanal solo se diligencia si es distinta a la legal vigente (ej. medio tiempo) — vacía, se usa la jornada legal del período.
+        </x-help-icon>
     </div>
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 
@@ -113,10 +119,10 @@
             </select>
         </div>
 
-        <div>
+        <div x-data="{ baseSalary: {{ old('base_salary', $employee?->base_salary ?? 'null') }} }">
             <label for="base_salary" class="{{ $labelClass }}">Salario básico mensual <span class="text-[var(--color-danger)]">*</span></label>
-            <input id="base_salary" name="base_salary" type="number" step="0.01" min="0"
-                   value="{{ old('base_salary', $employee?->base_salary) }}" class="{{ $inputClass }}" required />
+            <input id="base_salary" name="base_salary" type="text" x-money="baseSalary"
+                   class="{{ $inputClass }}" required />
             @error('base_salary')<p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>@enderror
         </div>
 
@@ -136,8 +142,11 @@
 
 {{-- SECCIÓN 3: Auxilio de transporte --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
-    <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Auxilio de transporte</h2>
+    <div class="px-6 py-4 border-b border-[var(--border-default)] flex items-center gap-2">
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Auxilio de transporte</h2>
+        <x-help-icon title="Auxilio de transporte">
+            Deja "Automático" en la mayoría de los casos — el sistema decide cada período si aplica según el salario devengado (tope de 2 SMLV). Usa "Siempre" o "Nunca" solo para excepciones puntuales, como la exoneración por vivienda en las instalaciones de la empresa (CST art. 132).
+        </x-help-icon>
     </div>
     <div class="px-6 py-5 space-y-4">
         <div class="max-w-sm">
@@ -162,8 +171,11 @@
 
 {{-- SECCIÓN 4: Seguridad social --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
-    <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Seguridad social</h2>
+    <div class="px-6 py-4 border-b border-[var(--border-default)] flex items-center gap-2">
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Seguridad social</h2>
+        <x-help-icon title="Seguridad social">
+            El nivel de riesgo ARL define la tarifa de aporte patronal en cada liquidación. Marca "No cotiza a pensión" solo si el trabajador ya está pensionado por vejez y sigue laborando — en ese caso no se le liquida descuento de pensión, aporte patronal ni fondo de solidaridad.
+        </x-help-icon>
     </div>
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
@@ -206,8 +218,11 @@
 
 {{-- SECCIÓN 5: Datos bancarios --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
-    <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Datos bancarios</h2>
+    <div class="px-6 py-4 border-b border-[var(--border-default)] flex items-center gap-2">
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Datos bancarios</h2>
+        <x-help-icon title="Datos bancarios">
+            Informativos — se muestran en el desprendible de pago como referencia, pero el sistema no procesa pagos ni transferencias reales.
+        </x-help-icon>
     </div>
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 
@@ -235,8 +250,11 @@
 
 {{-- SECCIÓN 6: Novedad de retiro --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
-    <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Novedad de retiro</h2>
+    <div class="px-6 py-4 border-b border-[var(--border-default)] flex items-center gap-2">
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Novedad de retiro</h2>
+        <x-help-icon title="Novedad de retiro">
+            Diligencia esto solo cuando el trabajador se retire. Es un requisito para poder generar su Liquidación de Contrato después — el motivo determina si hay lugar a indemnización.
+        </x-help-icon>
     </div>
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
 
@@ -254,7 +272,8 @@
         <div x-show="terminationReason !== ''" x-transition>
             <label for="termination_date" class="{{ $labelClass }}">Fecha de retiro</label>
             <input id="termination_date" name="termination_date" type="date"
-                   value="{{ old('termination_date', $employee?->termination_date?->format('Y-m-d')) }}" class="{{ $inputClass }}" />
+                   value="{{ old('termination_date', $employee?->termination_date?->format('Y-m-d')) }}"
+                   :disabled="terminationReason === ''" class="{{ $inputClass }}" />
             @error('termination_date')<p class="mt-1 text-[12px] text-[var(--color-danger)]">{{ $message }}</p>@enderror
         </div>
 
@@ -269,8 +288,11 @@
 
 {{-- SECCIÓN 7: Otros --}}
 <div class="bg-[var(--surface-card)] rounded-[var(--radius-card)] border border-[var(--border-default)] shadow-[var(--shadow-card)]">
-    <div class="px-6 py-4 border-b border-[var(--border-default)]">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Otros</h2>
+    <div class="px-6 py-4 border-b border-[var(--border-default)] flex items-center gap-2">
+        <h2 class="text-[16px] font-bold text-[var(--text-900)]">Otros</h2>
+        <x-help-icon title="Otros">
+            Un empleado "Inactivo" no aparece como opción al generar nuevos períodos de nómina, pero conserva todo su historial.
+        </x-help-icon>
     </div>
     <div class="px-6 py-5">
         <div class="max-w-xs">

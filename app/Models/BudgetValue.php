@@ -8,11 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class BudgetValue extends Model
 {
     protected $fillable = [
-        'budget_id', 'line_id', 'period_label', 'period_index', 'value', 'is_manual_override',
+        'budget_id', 'line_id', 'value_type', 'period_label', 'period_index',
+        'value', 'quantity', 'is_manual_override',
     ];
 
     protected $casts = [
         'value'              => 'float',
+        'quantity'           => 'float',
         'period_index'       => 'integer',
         'is_manual_override' => 'boolean',
     ];

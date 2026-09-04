@@ -18,6 +18,7 @@ class Client extends Model
 
     protected $fillable = [
         'user_id',
+        'consecutive_number',
         'name',
         'document_type',
         'document_number',
@@ -31,6 +32,10 @@ class Client extends Model
         'city',
         'department',
         'contact_person',
+        'legal_representative_name',
+        'legal_representative_document_type',
+        'legal_representative_document_number',
+        'chamber_of_commerce_city',
         'status',
         'notes',
         'invoice_prefix',
@@ -91,6 +96,21 @@ class Client extends Model
         return $this->hasMany(CesantiaSettlement::class);
     }
 
+    public function contractSettlements(): HasMany
+    {
+        return $this->hasMany(ContractSettlement::class);
+    }
+
+    public function vacationPeriods(): HasMany
+    {
+        return $this->hasMany(EmployeeVacationPeriod::class);
+    }
+
+    public function generatedDocuments(): HasMany
+    {
+        return $this->hasMany(GeneratedDocument::class);
+    }
+
     public function archiveRootName(): string
     {
         $doc = $this->document_number;
@@ -101,5 +121,13 @@ class Client extends Model
     public function getFullDocumentAttribute(): string
     {
         return $this->dv ? "{$this->document_number}-{$this->dv}" : $this->document_number;
+    }
+
+    /** Persona jurídica: quien firma el contrato es el representante legal, no la empresa. */
+    public function hasLegalRepresentative(): bool
+    {
+        return $this->person_type === 'juridica'
+            && filled($this->legal_representative_name)
+            && filled($this->legal_representative_document_number);
     }
 }

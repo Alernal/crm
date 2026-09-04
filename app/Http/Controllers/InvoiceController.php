@@ -35,7 +35,17 @@ class InvoiceController extends Controller
             $query->where('status', $status);
         }
 
-        $invoices = $query->orderByDesc('issue_date')->orderByDesc('id')->paginate(20)->withQueryString();
+        $sortable  = ['number', 'issue_date', 'due_date', 'total'];
+        $sort      = in_array($request->get('sort'), $sortable, true) ? $request->get('sort') : null;
+        $direction = $request->get('direction') === 'desc' ? 'desc' : 'asc';
+
+        if ($sort) {
+            $query->orderBy($sort, $direction)->orderByDesc('id');
+        } else {
+            $query->orderByDesc('issue_date')->orderByDesc('id');
+        }
+
+        $invoices = $query->paginate(20)->withQueryString();
 
         $counts = $request->user()->invoices()
             ->selectRaw('status, count(*) as total')
@@ -228,6 +238,10 @@ class InvoiceController extends Controller
         $clientInvoices = Invoice::where('user_id', $userId)
             ->where('client_id', $clientId)
             ->with('payments')
+            ->where(function ($q) {
+                $q->whereYear('issue_date', now()->year)
+                  ->orWhereIn('status', ['sent', 'overdue']);
+            })
             ->orderBy('issue_date')
             ->orderBy('id')
             ->get();

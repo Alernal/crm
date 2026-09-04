@@ -26,6 +26,12 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // Simétrico al login de miembros de equipo: evita que una sesión de "equipo" activa
+        // en el mismo navegador se mezcle con la del contador.
+        if (Auth::guard('team_member')->check()) {
+            Auth::guard('team_member')->logout();
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));

@@ -5,13 +5,12 @@
 
     {{-- Breadcrumb + título --}}
     <div class="mb-6">
-        <nav class="flex items-center gap-1.5 text-[14px] text-[var(--text-400)] mb-2">
-            <a href="{{ route('clients.index') }}" class="hover:text-[var(--color-primary)]">Clientes</a>
-            <x-lucide-chevron-right class="w-3.5 h-3.5" />
-            <span class="text-[var(--text-700)] font-medium">Nuevo cliente</span>
-        </nav>
-        <h1 class="text-[22px] font-semibold text-[var(--text-900)]">Nuevo cliente</h1>
-        <p class="text-[14px] text-[var(--text-500)] mt-0.5">Completa los datos tributarios y de contacto</p>
+        <a href="{{ route('clients.index') }}"
+           class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[14px] font-medium text-[var(--text-700)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-900)] mb-2">
+            <x-lucide-arrow-left class="w-4 h-4" />
+            Cancelar
+        </a>
+        <p class="text-[22px] font-bold text-[var(--text-900)]">Nuevo cliente</p>
     </div>
 
     <form method="POST" action="{{ route('clients.store') }}">
@@ -25,7 +24,7 @@
                 Guardar cliente
             </button>
             <a href="{{ route('clients.index') }}"
-               class="h-10 flex items-center px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
+               class="h-10 flex items-center px-4 rounded-[var(--radius-control)] bg-[var(--surface-subtle)] border border-[var(--border-default)] text-[var(--text-700)] text-[14px] font-medium hover:bg-[var(--surface-muted)]">
                 Cancelar
             </a>
         </div>

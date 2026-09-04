@@ -12,7 +12,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                sans: ['"Segoe UI"', 'Figtree', ...defaultTheme.fontFamily.sans],
             },
         },
     },

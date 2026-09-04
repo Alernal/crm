@@ -24,5 +24,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call(AdminUserSeeder::class);
         $this->call(PayrollLegalSettingSeeder::class);
+        $this->call(DocumentTypeSeeder::class);
+        $this->call(ClauseBlockSeeder::class);
+        $this->call(ContractTemplateSeeder::class);
     }
 }

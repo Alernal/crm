@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\TeamMember;
 use App\Models\User;
 
 return [
@@ -42,6 +43,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'team_member' => [
+            'driver' => 'session',
+            'provider' => 'team_members',
+        ],
     ],
 
     /*
@@ -71,6 +77,11 @@ return [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
+
+        'team_members' => [
+            'driver' => 'eloquent',
+            'model' => TeamMember::class,
+        ],
     ],
 
     /*

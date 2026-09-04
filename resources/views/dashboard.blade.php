@@ -75,7 +75,7 @@
 
     {{-- Cartera por antigüedad (dona) — 2/5 --}}
     <div class="xl:col-span-2 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] p-6">
-        <h2 class="text-[16px] font-semibold text-[var(--text-900)] mb-1">Cartera por antigüedad</h2>
+        <h2 class="text-[16px] font-bold text-[var(--text-900)] mb-1">Cartera por antigüedad</h2>
         <p class="text-[12px] text-[var(--text-400)] mb-4">Saldo pendiente según días de vencimiento</p>
 
         @if($receivable <= 0)
@@ -120,7 +120,7 @@
     <div class="xl:col-span-3 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] p-6">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Facturado vs. cobrado</h2>
+                <h2 class="text-[16px] font-bold text-[var(--text-900)]">Facturado vs. cobrado</h2>
                 <p class="text-[12px] text-[var(--text-400)]">Últimos 6 meses</p>
             </div>
             <div class="flex items-center gap-4 text-[12px]">
@@ -144,10 +144,10 @@
 
     {{-- Cuentas de cobro recientes (3/5) --}}
     <div class="xl:col-span-3 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)]">
-        <div class="px-6 py-5 border-b border-[var(--border-default)] flex items-center justify-between">
-            <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Cuentas de cobro recientes</h2>
+        <div class="px-6 py-5 flex items-center justify-between">
+            <h2 class="text-[17px] font-bold text-[var(--text-900)]">Cuentas de cobro recientes</h2>
             <a href="{{ Route::has('invoices.index') ? route('invoices.index') : '#' }}"
-               class="text-[13px] text-[var(--color-primary)] hover:underline font-medium">Ver todas →</a>
+               class="text-[14px] text-[var(--color-primary)] hover:underline font-medium">Ver todas →</a>
         </div>
 
         @if($recentInvoices->isEmpty())
@@ -155,8 +155,8 @@
             <div class="w-16 h-16 rounded-[var(--radius-card)] bg-[var(--surface-muted)] flex items-center justify-center mb-4">
                 <x-lucide-file-text class="w-8 h-8 text-[var(--text-400)]" />
             </div>
-            <p class="text-[14px] font-semibold text-[var(--text-700)]">Aún no hay cuentas de cobro</p>
-            <p class="text-[12px] text-[var(--text-400)] mt-1">Crea tu primera cuenta para comenzar</p>
+            <p class="text-[15px] font-semibold text-[var(--text-700)]">Aún no hay cuentas de cobro</p>
+            <p class="text-[13px] text-[var(--text-400)] mt-1">Crea tu primera cuenta para comenzar</p>
             <a href="{{ Route::has('invoices.create') ? route('invoices.create') : '#' }}"
                class="mt-4 inline-flex items-center gap-[6px] h-10 px-5 rounded-[var(--radius-control)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-[14px] font-medium">
                 <x-lucide-plus class="w-4 h-4" />
@@ -164,22 +164,22 @@
             </a>
         </div>
         @else
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto p-3">
             <table class="w-full">
                 <thead>
-                    <tr class="border-b border-[var(--border-default)]">
-                        <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left">N°</th>
-                        <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-left">Cliente</th>
-                        <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-right">Total</th>
-                        <th class="text-[11px] font-medium text-[var(--text-400)] uppercase tracking-[0.06em] px-6 py-3 text-center">Estado</th>
+                    <tr>
+                        <th class="bg-[var(--surface-card)] border-b border-[var(--border-default)] text-[13px] font-bold text-[var(--text-900)] px-6 py-3.5 text-left">N°</th>
+                        <th class="bg-[var(--surface-card)] border-b border-[var(--border-default)] text-[13px] font-bold text-[var(--text-900)] px-6 py-3.5 text-left">Cliente</th>
+                        <th class="bg-[var(--surface-card)] border-b border-[var(--border-default)] text-[13px] font-bold text-[var(--text-900)] px-6 py-3.5 text-right">Total</th>
+                        <th class="bg-[var(--surface-card)] border-b border-[var(--border-default)] text-[13px] font-bold text-[var(--text-900)] px-6 py-3.5 text-center">Estado</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($recentInvoices as $invoice)
-                    <tr class="border-b border-[var(--surface-muted)] hover:bg-[var(--surface-subtle)]">
-                        <td class="px-6 py-[14px] text-[13px] font-medium text-[var(--color-primary)]">{{ $invoice->number }}</td>
-                        <td class="px-6 py-[14px] text-[14px] text-[var(--text-700)]">{{ $invoice->client->name }}</td>
-                        <td class="px-6 py-[14px] text-right text-[14px] font-semibold text-[var(--text-900)]">
+                    <tr class="border-b border-[var(--surface-muted)] border-l-[3px] border-l-transparent hover:border-l-[var(--color-primary)] hover:bg-[var(--surface-subtle)]">
+                        <td class="px-6 py-[14px] text-[14px] text-[var(--text-500)]">{{ $invoice->number }}</td>
+                        <td class="px-6 py-[14px] text-[14px] text-[var(--text-500)]">{{ $invoice->client->name }}</td>
+                        <td class="px-6 py-[14px] text-right text-[14px] text-[var(--text-500)] tabular-nums">
                             ${{ number_format($invoice->total, 0, ',', '.') }}
                         </td>
                         <td class="px-6 py-[14px] text-center">
@@ -205,8 +205,8 @@
 
     {{-- Próximos vencimientos tributarios (2/5) --}}
     <div class="xl:col-span-2 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)]">
-        <div class="px-6 py-5 border-b border-[var(--border-default)] flex items-center justify-between">
-            <h2 class="text-[16px] font-semibold text-[var(--text-900)]">Próximos vencimientos</h2>
+        <div class="px-6 py-5 flex items-center justify-between">
+            <h2 class="text-[16px] font-bold text-[var(--text-900)]">Próximos vencimientos</h2>
             <a href="{{ Route::has('tax-events.index') ? route('tax-events.index') : '#' }}"
                class="text-[13px] text-[var(--color-primary)] hover:underline font-medium">Ver calendario →</a>
         </div>
@@ -220,34 +220,44 @@
             <p class="text-[12px] text-[var(--text-400)] mt-1">Todo al día por ahora</p>
         </div>
         @else
-        <div>
+        <div class="p-3">
             @foreach($nextTaxEvents as $event)
             @php
                 $daysLeft = now()->startOfDay()->diffInDays($event->due_date->startOfDay(), false);
                 $urgent   = $daysLeft <= 5;
                 $warning  = !$urgent && $daysLeft <= 10;
-                $dotColor = $urgent ? 'var(--color-danger)' : ($warning ? 'var(--color-warning)' : 'var(--color-primary)');
-                $textColor = $urgent ? 'var(--color-danger)' : ($warning ? 'var(--color-warning)' : 'var(--text-700)');
+                $variant  = $daysLeft < 0 ? 'danger' : ($urgent ? 'danger' : ($warning ? 'warning' : 'info'));
+                $badgeBg  = match($variant) {
+                    'danger'  => 'bg-[var(--color-danger-bg)]',
+                    'warning' => 'bg-[var(--color-warning-bg)]',
+                    default   => 'bg-[var(--color-primary-light)]',
+                };
+                $badgeIcon = match($variant) {
+                    'danger'  => 'text-[var(--color-danger)]',
+                    'warning' => 'text-[var(--color-warning)]',
+                    default   => 'text-[var(--color-primary)]',
+                };
             @endphp
-            <div class="px-6 py-[14px] flex items-start gap-3 border-b border-[var(--border-default)] last:border-b-0 hover:bg-[var(--surface-subtle)]">
-                <div class="flex-shrink-0 mt-1.5">
-                    <div class="w-2 h-2 rounded-full" style="background: {{ $dotColor }};"></div>
+            <a href="{{ Route::has('tax-events.client-calendar') ? route('tax-events.client-calendar', $event->client) : '#' }}"
+               class="flex items-center gap-3 px-6 py-[14px] border-b border-[var(--border-default)] last:border-b-0 border-l-[3px] border-l-transparent hover:border-l-[var(--color-primary)] hover:bg-[var(--surface-subtle)]">
+                <div class="w-9 h-9 rounded-full {{ $badgeBg }} flex items-center justify-center flex-shrink-0">
+                    <x-lucide-calendar-clock class="w-4 h-4 {{ $badgeIcon }}" />
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-[13px] font-medium text-[var(--text-900)] truncate">{{ $event->title }}</p>
+                    <p class="text-[13.5px] font-medium text-[var(--text-900)] truncate">{{ $event->title }}</p>
                     <p class="text-[12px] text-[var(--text-400)] truncate">{{ $event->client->name }}</p>
                 </div>
-                <div class="text-right flex-shrink-0">
-                    <p class="text-[13px] font-semibold" style="color: {{ $textColor }};">
-                        @if($daysLeft === 0) Hoy
+                <div class="text-right flex-shrink-0 flex flex-col items-end gap-1">
+                    <x-status-badge :variant="$variant">
+                        @if($daysLeft < 0) Vencido
+                        @elseif($daysLeft === 0) Hoy
                         @elseif($daysLeft === 1) Mañana
-                        @elseif($daysLeft < 0) Vencido
                         @else {{ $daysLeft }}d
                         @endif
-                    </p>
-                    <p class="text-[12px] text-[var(--text-400)]">{{ $event->due_date->format('d/m/Y') }}</p>
+                    </x-status-badge>
+                    <p class="text-[11px] text-[var(--text-400)]">{{ $event->due_date->format('d/m/Y') }}</p>
                 </div>
-            </div>
+            </a>
             @endforeach
         </div>
         @endif

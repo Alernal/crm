@@ -39,8 +39,6 @@
     .logo-box {
         width: 120pt;
         height: 60pt;
-        border: 1pt solid #dddddd;
-        background: #fafafa;
         text-align: center;
         line-height: 60pt;
         font-size: 0;
@@ -209,7 +207,7 @@
     .payment-section {
         margin-top: 18pt;
         padding: 10pt 12pt;
-        border: 0.5pt solid #dddddd;
+        border: 0.25pt solid #999999;
         background: #fafafa;
     }
     .payment-title {
@@ -237,17 +235,6 @@
     }
     .payment-link a {
         color: #1a56db;
-    }
-
-    /* ── Pie ── */
-    .footer {
-        margin-top: 28pt;
-        padding-top: 10pt;
-        border-top: 0.5pt solid #cccccc;
-        text-align: center;
-        font-size: 7pt;
-        color: #888888;
-        line-height: 1.6;
     }
 
     /* ── Estado de cuenta ── */
@@ -347,7 +334,6 @@
             <div class="party-name">{{ $user->name }}</div>
             <div class="party-detail">
                 @if($user->nit)NIT: {{ $user->nit }}<br/>@endif
-                @if($user->professional_card_number)T.P. {{ $user->professional_card_number }} - Contador Publico<br/>@endif
                 @if($user->address){{ $user->address }}@if($user->city), {{ $user->city }}@endif<br/>
                 @elseif($user->city){{ $user->city }}<br/>@endif
                 @if($user->phone)Tel: {{ $user->phone }}<br/>@endif
@@ -355,7 +341,7 @@
             </div>
         </div>
         <div class="party-col">
-            <div class="section-label">Facturar a</div>
+            <div class="section-label">Cobrar a</div>
             <div class="party-name">{{ $invoice->client->name }}</div>
             <div class="party-detail">
                 {{ $invoice->client->document_type }}: {{ $invoice->client->full_document }}<br/>
@@ -475,9 +461,6 @@
     </div>
     @endif
 
-    <div class="footer">
-        Elaborado por <strong>ALERNAL S.A.S.</strong> - Construyendo el manana
-    </div>
 
 </div>
 
@@ -601,9 +584,6 @@
     <p style="font-size:8pt; color:#888888; margin-top:6pt;">Sin pagos registrados.</p>
     @endif
 
-    <div class="footer">
-        Elaborado por <strong>ALERNAL S.A.S.</strong> - Construyendo el manana
-    </div>
 
 </div>
 </div>

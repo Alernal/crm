@@ -1,4 +1,9 @@
 :root {
+    /* El sistema está diseñado solo para modo claro con colores explícitos en cada
+       componente — declarar esto evita que el navegador (o una extensión de modo
+       oscuro forzado) reinterprete/repinte automáticamente los colores del sitio. */
+    color-scheme: light;
+
     --color-primary:       #2563EB;
     --color-primary-hover: #1D4ED8;
     --color-primary-light: #EFF6FF;
@@ -47,3 +52,7 @@
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-400); }
+
+[x-cloak] { display: none !important; }
+
+.chat-highlight-flash { background-color: var(--color-primary-light) !important; }

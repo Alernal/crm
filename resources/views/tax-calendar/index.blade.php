@@ -26,7 +26,7 @@
     @php
         $clientEvents  = $eventsByClient->get($client->id, collect());
         $pendingCount  = $clientEvents->where('status', 'pending')->count();
-        $overdueCount  = $clientEvents->filter(fn($e) => $e->status === 'overdue' || ($e->status === 'pending' && $e->due_date->isPast()))->count();
+        $overdueCount  = $clientEvents->where('status', 'overdue')->count();
 
         $initials = collect(explode(' ', $client->name))
             ->filter()->take(2)->map(fn($w) => strtoupper($w[0]))->implode('');
@@ -40,7 +40,7 @@
                 {{ $initials }}
             </div>
             <div class="flex-1 min-w-0">
-                <h3 class="text-[14px] font-semibold text-[var(--text-900)] leading-tight truncate">{{ $client->name }}</h3>
+                <h3 class="text-[14px] font-bold text-[var(--text-900)] leading-tight truncate">{{ $client->name }}</h3>
                 <p class="text-[12px] text-[var(--text-400)] mt-0.5">
                     {{ $client->document_type }} {{ $client->document_number }}
                     @if($client->dv)-{{ $client->dv }}@endif
@@ -62,11 +62,11 @@
         </div>
 
         {{-- Botón Ver --}}
-        <div class="mt-auto border-t border-[var(--border-default)] px-5 py-3 flex items-center justify-end">
+        <div class="mt-auto px-5 py-3 flex items-center justify-end">
             <a href="{{ route('tax-events.show', $client) }}"
                title="Ver calendario"
-               class="inline-flex items-center gap-[6px] h-9 px-4 rounded-[var(--radius-control)] border border-[var(--border-default)] text-[var(--text-700)] text-[13px] font-medium hover:bg-[var(--surface-muted)]">
-                Ver
+               class="w-9 h-9 rounded-[var(--radius-control)] bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)] text-[var(--color-primary)] flex items-center justify-center">
+                <x-lucide-eye class="w-4 h-4" />
             </a>
         </div>
 

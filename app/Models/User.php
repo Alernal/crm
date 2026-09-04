@@ -3,16 +3,17 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Concerns\ParticipatesInCommunications;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasCommunicationOwner
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, ParticipatesInCommunications;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +25,8 @@ class User extends Authenticatable
         'email',
         'password',
         'nit',
+        'identification_type',
+        'identification_number',
         'phone',
         'city',
         'address',
@@ -72,6 +75,11 @@ class User extends Authenticatable
         return $this->hasMany(Service::class);
     }
 
+    public function serviceCategories(): HasMany
+    {
+        return $this->hasMany(ServiceCategory::class);
+    }
+
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
@@ -115,5 +123,40 @@ class User extends Authenticatable
     public function cesantiaSettlements(): HasMany
     {
         return $this->hasMany(CesantiaSettlement::class);
+    }
+
+    public function contractSettlements(): HasMany
+    {
+        return $this->hasMany(ContractSettlement::class);
+    }
+
+    public function documentTemplates(): HasMany
+    {
+        return $this->hasMany(DocumentTemplate::class);
+    }
+
+    public function generatedDocuments(): HasMany
+    {
+        return $this->hasMany(GeneratedDocument::class);
+    }
+
+    public function documentTypeCounters(): HasMany
+    {
+        return $this->hasMany(DocumentTypeCounter::class);
+    }
+
+    public function teamMembers(): HasMany
+    {
+        return $this->hasMany(TeamMember::class, 'owner_id');
+    }
+
+    public function channels(): HasMany
+    {
+        return $this->hasMany(Channel::class, 'owner_id');
+    }
+
+    public function communicationOwnerId(): int
+    {
+        return $this->id;
     }
 }

@@ -10,6 +10,8 @@ class Service extends Model
 {
     protected $fillable = [
         'user_id',
+        'category_id',
+        'consecutive_number',
         'name',
         'description',
         'unit',
@@ -26,6 +28,11 @@ class Service extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ServiceCategory::class, 'category_id');
     }
 
     public function invoiceItems(): HasMany

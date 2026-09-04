@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BudgetSection extends Model
 {
-    protected $fillable = ['budget_id', 'name', 'sort_order'];
+    protected $fillable = ['budget_id', 'name', 'sort_order', 'is_outflow', 'statement_role'];
 
-    protected $casts = ['sort_order' => 'integer'];
+    protected $casts = ['sort_order' => 'integer', 'is_outflow' => 'boolean'];
 
     public function budget(): BelongsTo
     {

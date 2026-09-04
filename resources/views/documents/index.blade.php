@@ -8,7 +8,8 @@
 
         {{-- Flash --}}
         @if(session('success'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3500)"
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
+             x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
              class="flex items-center gap-3 p-4 bg-[var(--color-success-bg)] border border-[var(--color-success)]/20 rounded-[var(--radius-control)] text-[var(--color-success-text)] text-[14px]">
             <x-lucide-check-circle class="w-5 h-5 flex-shrink-0" />
             {{ session('success') }}
